@@ -1,0 +1,20 @@
+version: "0.2"
+ignorePaths: []
+dictionaryDefinitions: []
+dictionaries: []
+words:
+  - commitlint
+  - composables
+  - favicons
+  - lintfix
+  - niemopen
+  - nuxt
+  - nuxtjs
+  - paren
+  - pinia
+  - popperjs
+  - stroustrup
+  - stylelint
+  - vuejs
+ignoreWords: []
+import: []

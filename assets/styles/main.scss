@@ -1,0 +1,96 @@
+
+$primary: $color-niem;
+
+@import "bootstrap/scss/bootstrap";
+
+a[href] {
+  color: #00709A;
+}
+
+button.current {
+  -webkit-text-stroke: 1px;
+}
+
+body {
+  height: 100vh;
+}
+
+.i-step {
+  // Circled numbers are smaller
+  margin-left: 2px;
+  margin-right: 14px;
+  font-size: large;
+}
+
+i {
+  margin-right: 16px;
+}
+
+kbd {
+  background-color: whitesmoke;
+  color: darkgray;
+}
+
+
+.page-header kbd {
+  background-color: slategray;
+}
+
+.bg-niem {
+  background-color: $color-niem;
+}
+
+.btn-niem {
+  background-color: $color-niem-light;
+  border: 1px solid lightgray;
+  color: darkslategray;
+  font-weight: 500;
+}
+
+button > i {
+  margin-right: 12px;
+}
+
+.nav-link {
+  color: $color-niem;
+}
+
+.text-niem {
+  color: $color-niem;
+}
+
+.app-primary {
+  background-color: $primary-bg-subtle;
+  border-color: $primary-border-subtle;
+  color: $primary-text;
+}
+
+.app-secondary {
+  background-color: $secondary-bg-subtle;
+  border-color: $secondary-border-subtle;
+  color: $secondary-text;
+}
+
+.app-success {
+  background-color: $success-bg-subtle;
+  border-color: $success-border-subtle;
+  color: $success-text;
+}
+
+.app-info {
+  background-color: $info-bg-subtle;
+  border-color: $info-border-subtle;
+  color: $info-text;
+}
+
+.app-warning {
+  background-color: $warning-bg-subtle;
+  border-color: $warning-border-subtle;
+  color: $warning-text;
+}
+
+.app-danger {
+  background-color: $danger-bg-subtle;
+  border-color: $danger-border-subtle;
+  color: $danger-text;
+}
