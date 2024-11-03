@@ -1,74 +1,69 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-import { defineNuxtConfig } from "nuxt/config";
-
 export default defineNuxtConfig({
-
-  mode: "spa",
-  ssr: true,
-
-  modules: [
-    // "@nuxtjs/robots",
-    "@pinia/nuxt",
-    "@vite-pwa/nuxt"
-  ],
-
+  alias: {
+    pinia: "/node_modules/@pinia/nuxt/node_modules/pinia/dist/pinia.mjs"
+  },
   app: {
-    baseURL: "/niem-toolbox/"
+    baseURL: "/niem-toolbox/",
+    head: {
+      htmlAttrs: {
+        lang: "en-US"
+      },
+      title: "NIEM Toolbox"
+    }
   },
-
-  publicRuntimeConfig: {
+  compatibilityDate: '2024-04-03',
+  css: [
+    "~/assets/styles/main.scss"
+  ],
+  devtools: {
+    enabled: true
   },
-
-  // @ts-ignore
-  head: {
-    htmlAttrs: {
-      lang: "en-US"
-    },
-    bodyAttrs: {
-      class: "d-flex flex-column h-100"
-    },
-    title: "NIEM Toolbox",
-    meta: [
-    ],
-    link: [
-    ],
-    script: [
-      { src: "https://code.jquery.com/jquery-3.6.3.slim.min.js" },
-      { src: "~/assets/js/scripts.js" }
+  icon: {
+    provider: "server",
+    customCollections: [
+      {
+        prefix: "app",
+        dir: "./assets/icons"
+      }
     ]
   },
-
+  modules: [
+    '@nuxt/ui',
+    '@vite-pwa/nuxt',
+    '@pinia/nuxt',
+    "@vueuse/nuxt",
+  ],
+  nitro: {
+    prerender: {
+      // failOnError: false
+    }
+  },
+  pwa: {
+    // registerType: "autoUpdate",
+    manifest: {
+      name: "NIEM Toolbox",
+      short_name: "niem-toolbox",
+    },
+    client: {
+      // installPrompt: true
+    }
+  },
+  ssr: false,
+  // ui: {
+  //   theme: {
+  //     colors: ["primary", "secondary", "success", "warning", "error", "info", "neutral"]
+  //   }
+  // },
   vite: {
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: "@use '@/assets/styles/variables.scss' as *;"
-          // additionalData: "@import '@/assets/styles/variables.scss';"
+          additionalData: "@use '~/assets/styles/variables.scss' as *;",
+          api: "modern-compiler"
         }
       }
     }
-  },
-
-  css: [
-    "~/assets/styles/main.scss",
-    // @ts-ignore
-    { src: "bootstrap-icons/font/bootstrap-icons.scss", lang: "scss" }
-  ],
-
-  nitro: {
-    output: {
-      // dir: "public"
-    }
-  },
-
-  // @ts-ignore
-  pwa: {
-
-  },
-
-  // @ts-ignore
-  robots: {
-
   }
 });

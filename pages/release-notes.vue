@@ -1,45 +1,103 @@
 
 <template>
-  <div>
-    <PageHeader id="release-notes" />
+  <NuxtLayout>
+    <template #header>
+      <PageHeader :link="links.releaseNotes"/>
+    </template>
 
-    <!-- eslint-disable-next-line vue/no-v-html -->
-    <div id="version-body" class="card" v-html="changelog" />
-  </div>
+    <UCard v-for="note in notes" :key="note.header" class="card">
+      <template #header>
+        <h2>{{ note.header }}</h2>
+      </template>
+
+      <div v-if="note.features">
+        <h3>Features</h3>
+        <ul class="ml-5">
+          <li v-for="feature in note.features" class="bullets">
+            <span class="feature-summary">{{ feature.summary }}</span>
+            <p v-if="feature.description" class="feature-description">
+              {{ feature.description }}
+            </p>
+          </li>
+        </ul>
+      </div>
+    </UCard>
+  </NuxtLayout>
 </template>
 
 <script setup>
-import changelog from "assets/js/changelog";
+
+/**
+  @type{{
+    header: string,
+    features?: {summary: string, description?: string}[],
+    fixes?: string[]
+  }[]}
+*/
+const notes = [
+  {
+    header: "Alpha 2: 2024-10-28",
+    features: [
+      {
+        summary: "Migrate NIEM subsets",
+        description: "Migrate a NIEM subset in a CMF file to a more recent version of NIEM."
+      },
+      {
+        summary: "Validate NIEM XSD",
+        description: "Validate NIEM XML schemas and check for NDR conformance."
+      },
+      {
+        summary: "Validate NIEM XML",
+        description: "Validate NIEM XML instances against their schemas."
+      },
+      {
+        summary: "Validate NIEM message catalogs",
+        description: "Validate NIEM IEPD / message catalog XML instances (defined by NIEM's MPD / IEPD specification)."
+      },
+      {
+        summary: "Validate XML catalogs",
+        description: "Validate XML catalogs (defined by OASIS), which can be used to override file location paths in XSD import statements."
+      }
+    ]
+  },
+  {
+    header: "Alpha 1: 2023-03-31",
+    features: [
+      {
+        summary: "Initial application",
+        description: ""
+      },
+      {
+        summary: "Transform NIEM models",
+        description: "Transform NIEM models in CMF or XML Schemas to CMF, XML Schemas, JSON Schema, or OWL."
+      }
+    ]
+  }
+]
+
 </script>
 
-<style lang="scss">
+<style scoped>
 
-// Note: v-html is not affected by scoped styles
+  .card {
+    margin-bottom: 18px;
+  }
 
-#version-body > :is(h1, h2, h3, p) {
-  padding: 16px $padding-left-app;
-}
+  .card:hover {
+    background-color: color-mix(in srgb, whitesmoke 50%, transparent);
+  }
 
-#version-body h1 {
-  font-size: 1.3rem !important;
-  font-weight: bold;
-}
+  .card > :first-child {
+    background-color: whitesmoke;
+  }
 
-#version-body h2 {
-  font-size: 1.2rem;
-  background-color: gainsboro;
-  opacity: 0.7;
-  border-radius: 0.375rem;
-}
+  .feature-description {
+    font-weight: 300;
+    font-size: smaller;
+  }
 
-#version-body h3 {
-  font-size: 1.0rem;
-  font-weight: bold;
-}
-
-#version-body ul {
-  padding-left: calc($padding-left-app + 24px);
-  border-color: gainsboro;
-}
+  li {
+    margin-bottom: 12px;
+  }
 
 </style>

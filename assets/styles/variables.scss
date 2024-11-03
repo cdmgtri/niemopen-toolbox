@@ -1,11 +1,15 @@
 
-// $color-niem: #00709A;
-$color-niem: #297DB3;
-$color-niem-light: #297eb32f;
+:root {
+  --color-niem: #297DB3;
+  --color-niem-light: #297eb32f;
+  --color-light: #f5f5f5;
 
-// Leading icons with padding and spacing takes 48px
-$padding-left-app: 48px;
+  --app-margin-left: 12px;
 
-// Fixed height values
-$height-navbar: 40px;
-$height-footer: 64px;
+  --app-padding-left: 12px;
+  --app-padding-right: 12px;
+
+  --app-vertical-spacer: 24px;
+
+  /* --color-niem-2: #00709A; */
+}

@@ -3,18 +3,23 @@ ignorePaths: []
 dictionaryDefinitions: []
 dictionaries: []
 words:
-  - commitlint
+  - cmftool
   - composables
+  - divs
   - favicons
-  - lintfix
+  - heroicons
+  - iconify
   - niemopen
   - nuxt
   - nuxtjs
-  - paren
+  - octicon
+  - persistedstate
   - pinia
-  - popperjs
-  - stroustrup
-  - stylelint
-  - vuejs
+  - pwa
+  - Slideover
+  - tailwindcss
+  - ui
+  - Vite
+  - vueuse
 ignoreWords: []
 import: []

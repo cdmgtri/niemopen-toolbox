@@ -1,96 +1,67 @@
 
-$primary: $color-niem;
+/* TODO: Clean up styles */
 
-@import "bootstrap/scss/bootstrap";
+@import url("icons.scss");
+// @import url("variables.scss");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 a[href] {
   color: #00709A;
 }
 
-button.current {
-  -webkit-text-stroke: 1px;
+a[href]:hover {
+  color: #00709A;
+  font-weight: bolder;
 }
 
-body {
-  height: 100vh;
+button:active {
+  // background-color: dimgray !important;
+  // color: white !important;
 }
 
-.i-step {
-  // Circled numbers are smaller
-  margin-left: 2px;
-  margin-right: 14px;
+button:hover {
+  font-weight: bolder;
+}
+
+form > *:not(:first-child), .spaced > *:not(:first-child) {
+  margin-top: var(--app-vertical-spacer);
+}
+
+h1 {
+  font-size: x-large;
+  font-weight: 700;
+}
+
+h2 {
+  /* @apply text-xl; */
   font-size: large;
-}
-
-i {
-  margin-right: 16px;
-}
-
-kbd {
-  background-color: whitesmoke;
-  color: darkgray;
-}
-
-
-.page-header kbd {
-  background-color: slategray;
-}
-
-.bg-niem {
-  background-color: $color-niem;
-}
-
-.btn-niem {
-  background-color: $color-niem-light;
-  border: 1px solid lightgray;
-  color: darkslategray;
   font-weight: 500;
 }
 
-button > i {
+h3 {
+  font-weight: 500;
+  padding-bottom: 4px;
+}
+
+input::file-selector-button {
   margin-right: 12px;
 }
 
-.nav-link {
-  color: $color-niem;
+kbd {
+  // background-color: whitesmoke;
+  // color: darkgray;
+  background-color: transparent !important;
+  border-width: 0 !important;
+  color: var(--color-amber-800) !important;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: small !important;
+  font-weight: bolder !important;
 }
 
-.text-niem {
-  color: $color-niem;
-}
-
-.app-primary {
-  background-color: $primary-bg-subtle;
-  border-color: $primary-border-subtle;
-  color: $primary-text;
-}
-
-.app-secondary {
-  background-color: $secondary-bg-subtle;
-  border-color: $secondary-border-subtle;
-  color: $secondary-text;
-}
-
-.app-success {
-  background-color: $success-bg-subtle;
-  border-color: $success-border-subtle;
-  color: $success-text;
-}
-
-.app-info {
-  background-color: $info-bg-subtle;
-  border-color: $info-border-subtle;
-  color: $info-text;
-}
-
-.app-warning {
-  background-color: $warning-bg-subtle;
-  border-color: $warning-border-subtle;
-  color: $warning-text;
-}
-
-.app-danger {
-  background-color: $danger-bg-subtle;
-  border-color: $danger-border-subtle;
-  color: $danger-text;
+li.bullets {
+  @apply list-disc;
+  @apply list-outside;
 }

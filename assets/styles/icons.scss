@@ -1,0 +1,16 @@
+
+button>.iconify.disabled {
+  color: var(--ui-text-dimmed);
+}
+
+button>.iconify:hover:not(.disabled) {
+  color: var(--ui-text-highlighted);
+}
+
+button:has(> .iconify.open) {
+  background-color: var(--color-neutral-200);
+}
+
+.iconify.open {
+  color: var(--ui-text-highlighted);
+}

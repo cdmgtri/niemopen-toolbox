@@ -1,94 +1,66 @@
 
 <template>
-  <div>
-    <PageHeader id="home" />
+  <NuxtLayout>
+    <template #header>
+      <PageHeader :link="links.home">
+        <template #user>
+          USER INFO
+        </template>
+        <template #developer>
+          DEVELOPER INFO
+        </template>
+        <template #preferences>
+          PREFERENCES
+        </template>
+      </PageHeader>
+    </template>
 
-    <ul class="list-group icon-list">
-      <li
-        v-for="page in pages"
-        :key="page.title"
-        class="list-group-item list-group-item-action"
-      >
-        <!-- Icon -->
-        <i :class="`bi bi-${ page.icon } item-icon`" aria-hidden="true"></i>
+    <template #default>
+      <div>
+        <UCard v-for="page in getLinks(groups.tools)" :ui="ui">
+          <!-- Page icon -->
+          <UIcon :name="page.icon" class="mr-2"/>
 
-        <!-- Title with link -->
-        <b v-if="page.link">
-          <NuxtLink :to="page.link" class="item-link">
-            {{ page.title }}
-          </NuxtLink>
-        </b>
+          <!-- Page title as link if available... -->
+          <span v-if="page.to">
+            <ULink :to="page.to" class="label-link font-semibold">{{ page.label }}</ULink>
+            <UBadge color="warning" variant="subtle" class="ml-2 align-top">alpha</UBadge>
+          </span>
+          <!-- ...otherwise page title as text -->
+          <span v-else class="label-text">
+            <span class="font-semibold">{{ page.label }}</span>
+            <UBadge color="neutral" variant="outline" class="ml-2 align-top">future</UBadge>
+          </span>
 
-        <!-- Title without link -->
-        <a v-else class="item-link item-link-unavailable">
-          {{ page.title }}
-        </a>
 
-        <!-- Badge with development status -->
-        <!-- :class="`float-end badge badge-${ getBadgeColor(page.status) }`" -->
-        <!--
-        <span
-          :class="`float-end badge ${ getBadgeClasses(page.status) }`"
-          role="status"
-          :aria-label="page.status"
-        >
-          {{ page.draft }} | <span id="schedule">{{ page.schedule }}</span>
-        </span>
- -->
+          <!-- Page description -->
+          <p class="label-description">{{ page.description }}</p>
+        </UCard>
+      </div>
+    </template>
+  </NuxtLayout>
 
-        <!-- Description -->
-        <div v-if="page.description" class="small text-muted item-description">
-          {{ page.description }}
-        </div>
-      </li>
-    </ul>
-  </div>
 </template>
 
 <script setup>
 
-import { getPages } from "assets/js/pages";
-const pages = getPages("home");
-
-/**
- * Returns the badge color given a status.
- * @param {"completed"|"in progress"|"future"} status - Page status
- * @returns Bootstrap icon base name, without the "bi-" prefix
- */
-function getBadgeClasses(status) {
-  switch (status) {
-    case "future":
-      return "app-secondary";
-    case "in progress":
-      return "app-warning";
-      // return "bg-warning-subtle custom-text-warning";
-    case "completed":
-      return "app-success";
-  }
+const ui = {
+  body: "p-x-1 sm:p-x-1 p-y-1 sm:p-y-1"
 }
 
 </script>
 
-<style scoped lang="scss">
+<style lang="css" scoped>
 
-$padding-list-group-x: 16px;
+  .iconify {
+    color: var(--ui-text-muted);
+  }
 
-.item-description {
-  margin-left: calc($padding-left-app - $padding-list-group-x);
-}
-
-.item-link-unavailable {
-  color: black;
-  text-decoration: none;
-}
-
-.list-group-item {
-  padding: 12px $padding-list-group-x;
-;
-}
-
-#schedule {
-  font-family: 'Courier New', Courier, monospace;
-}
+  .label-description {
+    font-size: smaller;
+    color: slategray;
+    font-weight: 400;
+    margin-left: 24px;
+  }
 
 </style>
