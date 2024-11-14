@@ -1,198 +1,47 @@
 {
   "name": "niem-toolbox",
-  "version": "0.1.0",
+  "version": "1.0-alpha2",
   "description": "A collection of utilities to support NIEM model management work and to provide a working demo of NIEM API 2.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "changelog": "npm run release:dry_run && npm run changelog:stage:assets && git checkout HEAD -- CHANGELOG.md",
-    "changelog:assets": "node resources/scripts/loadChangelogIntoNuxtAssets.js",
-    "commit": "cz",
-    "commit:retry": "cz --retry",
-    "deploy": "gh-pages -d dist -o origin -t true",
-    "deploy:gen": "npm run generate && npm run deploy",
+    "build:gh-pages": "nuxt build --preset github_pages",
+    "deploy": "gh-pages -d .output/public -o niem -t true",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
-    "lint:code": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
-    "lint:style": "stylelint \"**/*.{css,scss,sass,html,vue}\" --ignore-path .gitignore",
-    "lint": "npm run lint:code && npm run lint:style",
-    "lintfix": "npm run lint:code -- --fix && npm run lint:style -- --fix",
-    "prepare": "husky install",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "release": "standard-version -a",
-    "release:first": "standard-version -a --first-release",
-    "release:alpha": "standard-version -a --prerelease alpha",
-    "release:dry_run": "standard-version -a --first-release --skip.bump --skip.tag --skip.commit",
-    "release:dry_run:view": "standard-version -a --first-release --dry-run",
-    "test": "jest"
+    "serve": "npx serve .output/public ",
+    "stage": "gh-pages -d .output/public -o cdm -t true"
   },
   "dependencies": {
-    "@nuxtjs/robots": "^3.0.0",
-    "@popperjs/core": "^2.11.6",
-    "bootstrap": "^5.3.0-alpha1",
-    "bootstrap-icons": "^1.10.3",
-    "gh-pages": "^5.0.0",
-    "pinia": "^2.0.32"
+    "@iconify-json/bi": "^1.2.1",
+    "@iconify-json/gravity-ui": "^1.2.2",
+    "@iconify-json/heroicons": "^1.2.1",
+    "@iconify-json/hugeicons": "^1.2.1",
+    "@iconify-json/material-symbols": "^1.2.5",
+    "@iconify-json/material-symbols-light": "^1.2.5",
+    "@iconify-json/mdi": "^1.2.1",
+    "@iconify-json/octicon": "^1.2.1",
+    "@iconify-json/ph": "^1.2.1",
+    "@iconify-json/simple-icons": "^1.2.11",
+    "@iconify-json/tabler": "^1.2.7",
+    "@iconify/tailwind": "^1.1.3",
+    "@nuxt/content": "^2.13.4",
+    "@nuxt/ui": "^3.0.0-alpha.7",
+    "@vueuse/core": "^11.1.0",
+    "@vueuse/nuxt": "^11.1.0",
+    "file-saver": "^2.0.5",
+    "nuxt": "^3.13.2",
+    "vue": "latest",
+    "vue-router": "latest"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.19.1",
-    "@commitlint/cli": "^17.4.4",
-    "@commitlint/config-conventional": "^17.4.4",
-    "@nuxt/content": "^2.4.3",
-    "@nuxt/test-utils": "^3.2.2",
-    "@nuxtjs/eslint-config": "^12.0.0",
-    "@pinia/nuxt": "^0.4.7",
-    "@vite-pwa/nuxt": "^0.0.6",
-    "babel-core": "^6.26.3",
-    "babel-jest": "^29.4.3",
-    "commitizen": "^4.3.0",
-    "eslint": "^8.34.0",
-    "eslint-plugin-jest": "^27.2.1",
-    "eslint-plugin-nuxt": "^4.0.0",
-    "eslint-plugin-vue": "^9.9.0",
-    "eslint-plugin-vuejs-accessibility": "^2.1.0",
-    "husky": "^8.0.3",
-    "jest": "^29.4.3",
-    "jest-environment-jsdom": "^29.4.3",
-    "lint-staged": "^13.1.2",
-    "nuxt": "^3.2.2",
-    "postcss-html": "^1.5.0",
-    "sass": "^1.58.3",
-    "showdown": "^2.1.0",
-    "standard-version": "^9.5.0",
-    "stylelint": "^15.2.0",
-    "stylelint-config-recommended-vue": "^1.4.0",
-    "stylelint-config-standard": "^30.0.1",
-    "stylelint-config-standard-scss": "^7.0.1"
-  },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "browser": true,
-      "jest/globals": true,
-      "jquery": true,
-      "node": true
-    },
-    "parserOptions": {
-      "parser": "@babel/eslint-parser",
-      "requireConfigFile": false
-    },
-    "extends": [
-      "@nuxtjs/eslint-config",
-      "plugin:vuejs-accessibility/recommended"
-    ],
-    "ignorePatterns": [
-      "assets/js/FileSaver.js"
-    ],
-    "plugins": [
-      "jest",
-      "vuejs-accessibility"
-    ],
-    "rules": {
-      "brace-style": [
-        "error",
-        "stroustrup"
-      ],
-      "comma-dangle": "warn",
-      "eol-last": "error",
-      "indent": "warn",
-      "no-multiple-empty-lines": "warn",
-      "no-unused-vars": "warn",
-      "padded-blocks": [
-        "error",
-        {
-          "blocks": "never",
-          "classes": "always",
-          "switches": "never"
-        }
-      ],
-      "quotes": [
-        "error",
-        "double"
-      ],
-      "semi": [
-        "error",
-        "always"
-      ],
-      "space-before-function-paren": [
-        "error",
-        {
-          "anonymous": "never",
-          "named": "never",
-          "asyncArrow": "always"
-        }
-      ],
-      "valid-jsdoc": [
-        "warn",
-        {
-          "requireReturn": false,
-          "requireReturnType": false,
-          "requireReturnDescription": false
-        }
-      ],
-      "vuejs-accessibility/label-has-for": [
-        "error",
-        {
-          "required": {
-            "every": [
-              "id"
-            ]
-          }
-        }
-      ],
-      "vue/html-self-closing": "off"
-    }
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "jest": {
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/$1",
-      "^~/(.*)$": "<rootDir>/$1",
-      "^vue$": "vue/dist/vue.common.js"
-    },
-    "moduleFileExtensions": [
-      "js",
-      "vue",
-      "json"
-    ],
-    "transform": {
-      "^.+\\.js$": "babel-jest",
-      ".*\\.(vue)$": "vue-jest"
-    },
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "<rootDir>/components/**/*.vue",
-      "<rootDir>/layouts/**/*.vue",
-      "<rootDir>/pages/**/*.vue"
-    ],
-    "testEnvironment": "jsdom"
-  },
-  "lint-staged": {
-    "*.{js,vue}": "eslint --cache --fix",
-    "*.{css,scss,sass,html,vue}": "stylelint"
-  },
-  "standard-version": {},
-  "stylelint": {
-    "extends": [
-      "stylelint-config-standard",
-      "stylelint-config-standard-scss",
-      "stylelint-config-recommended-vue"
-    ],
-    "rules": {}
+    "@pinia/nuxt": "^0.5.5",
+    "@types/file-saver": "^2.0.7",
+    "@vite-pwa/nuxt": "^0.10.5",
+    "gh-pages": "^6.2.0",
+    "sass-embedded": "^1.80.4"
   }
 }

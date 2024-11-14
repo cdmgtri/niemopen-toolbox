@@ -1,94 +1,91 @@
 
 <template>
-  <div>
-    <PageHeader id="home" />
+  <PageHeader :link="links.home">
+    <template #info>
+      <p>
+        Use the provided utilities to help manage NIEM data models or to see working demos of NIEM API 2.0 functionality.
+      </p>
 
-    <ul class="list-group icon-list">
-      <li
-        v-for="page in pages"
-        :key="page.title"
-        class="list-group-item list-group-item-action"
-      >
-        <!-- Icon -->
-        <i :class="`bi bi-${ page.icon } item-icon`" aria-hidden="true"></i>
+      <p>
+        This application is under development.  It is open source and will be a replacement for SSGT, Migration Tool, and ConTesA functionality.
+      </p>
 
-        <!-- Title with link -->
-        <b v-if="page.link">
-          <NuxtLink :to="page.link" class="item-link">
-            {{ page.title }}
-          </NuxtLink>
-        </b>
+      <p class="font-medium">Tips:</p>
 
-        <!-- Title without link -->
-        <a v-else class="item-link item-link-unavailable">
-          {{ page.title }}
-        </a>
+      <ul class="bullets">
+        <li>
+          Toggle the page buttons to open or close the panel.  The button is blue when the panel is open.
+        </li>
+      </ul>
 
-        <!-- Badge with development status -->
-        <!-- :class="`float-end badge badge-${ getBadgeColor(page.status) }`" -->
-        <!--
-        <span
-          :class="`float-end badge ${ getBadgeClasses(page.status) }`"
-          role="status"
-          :aria-label="page.status"
-        >
-          {{ page.draft }} | <span id="schedule">{{ page.schedule }}</span>
-        </span>
- -->
+      <p class="font-medium">Report bugs:</p>
 
-        <!-- Description -->
-        <div v-if="page.description" class="small text-muted item-description">
-          {{ page.description }}
-        </div>
-      </li>
-    </ul>
-  </div>
+      <ul class="bullets">
+        <li>
+          Create an issue on the repo at <CustomLink :link="links.toolboxRepo"/> <span class="font-light text-xs">(GitHub account required)</span>
+        </li>
+        <li>
+          Submit a report through <CustomLink :link="links.contact"/>
+        </li>
+      </ul>
+    </template>
+
+    <template #developer>
+      <p>
+        See the developer information panels on each of the utility pages for information on how to make the corresponding API calls.
+      </p>
+
+      <p>
+        The Swagger UI and OpenAPI JSON file are available at <CustomLink :link="links.apiUI"/>.
+      </p>
+    </template>
+
+    <template #preferences>
+      <p>Page-specific preferences will be available in this panel.</p>
+    </template>
+  </PageHeader>
+
+  <UCard v-for="page in getLinks(groups.tools)" :ui="ui">
+    <!-- Page icon -->
+    <UIcon :name="page.icon" class="mr-2"/>
+
+    <!-- Page title as link if available... -->
+    <span v-if="page.to">
+      <ULink :to="page.to" class="label-link font-semibold">{{ page.label }}</ULink>
+      <UBadge color="warning" variant="subtle" class="ml-2 align-top">alpha</UBadge>
+    </span>
+    <!-- ...otherwise page title as text -->
+    <span v-else class="label-text">
+      <span class="font-semibold">{{ page.label }}</span>
+      <UBadge color="neutral" variant="outline" class="ml-2 align-top">future</UBadge>
+    </span>
+
+
+    <!-- Page description -->
+    <p class="label-description">{{ page.description }}</p>
+  </UCard>
+
 </template>
 
 <script setup>
 
-import { getPages } from "assets/js/pages";
-const pages = getPages("home");
-
-/**
- * Returns the badge color given a status.
- * @param {"completed"|"in progress"|"future"} status - Page status
- * @returns Bootstrap icon base name, without the "bi-" prefix
- */
-function getBadgeClasses(status) {
-  switch (status) {
-    case "future":
-      return "app-secondary";
-    case "in progress":
-      return "app-warning";
-      // return "bg-warning-subtle custom-text-warning";
-    case "completed":
-      return "app-success";
-  }
+const ui = {
+  body: "sm:p-5 p-5"
 }
 
 </script>
 
-<style scoped lang="scss">
+<style lang="css" scoped>
 
-$padding-list-group-x: 16px;
+  .iconify {
+    color: var(--ui-text-muted);
+  }
 
-.item-description {
-  margin-left: calc($padding-left-app - $padding-list-group-x);
-}
-
-.item-link-unavailable {
-  color: black;
-  text-decoration: none;
-}
-
-.list-group-item {
-  padding: 12px $padding-list-group-x;
-;
-}
-
-#schedule {
-  font-family: 'Courier New', Courier, monospace;
-}
+  .label-description {
+    font-size: smaller;
+    color: slategray;
+    font-weight: 400;
+    margin-left: 24px;
+  }
 
 </style>

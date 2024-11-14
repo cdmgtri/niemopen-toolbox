@@ -1,74 +1,88 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-import { defineNuxtConfig } from "nuxt/config";
-
 export default defineNuxtConfig({
-
-  mode: "spa",
-  ssr: true,
-
-  modules: [
-    // "@nuxtjs/robots",
-    "@pinia/nuxt",
-    "@vite-pwa/nuxt"
-  ],
-
+  alias: {
+    pinia: "/node_modules/@pinia/nuxt/node_modules/pinia/dist/pinia.mjs"
+  },
   app: {
-    baseURL: "/niem-toolbox/"
-  },
-
-  publicRuntimeConfig: {
-  },
-
-  // @ts-ignore
-  head: {
-    htmlAttrs: {
-      lang: "en-US"
+    baseURL: "/niem-toolbox/",
+    head: {
+      htmlAttrs: {
+        lang: "en-US"
+      },
+      link: [
+        {
+          rel: "icon",
+          type: "image/x-icon",
+          href: "favicon.ico"
+        }
+      ],
+      title: "NIEM Toolbox"
     },
-    bodyAttrs: {
-      class: "d-flex flex-column h-100"
-    },
-    title: "NIEM Toolbox",
-    meta: [
-    ],
-    link: [
-    ],
-    script: [
-      { src: "https://code.jquery.com/jquery-3.6.3.slim.min.js" },
-      { src: "~/assets/js/scripts.js" }
+    rootId: "toolbox-app"
+  },
+  compatibilityDate: '2024-04-03',
+  css: [
+    "~/assets/styles/main.scss"
+  ],
+  devtools: {
+    enabled: true
+  },
+  icon: {
+    provider: "iconify",
+    customCollections: [
+      {
+        prefix: "app",
+        dir: "./assets/icons"
+      }
     ]
   },
-
+  // TODO: include module '@vite-pwa/nuxt'
+  modules: ['@nuxt/ui', '@pinia/nuxt', "@vueuse/nuxt", "@nuxt/content"],
+  nitro: {
+    prerender: {
+      // failOnError: false
+    }
+  },
+  // pwa: {
+  //   // registerType: "autoUpdate",
+  //   base: "",
+  //   client: {
+  //     // installPrompt: true
+  //   },
+  //   manifest: {
+  //     name: "NIEM Toolbox",
+  //     lang: "en-US"
+  //   },
+  //   scope: "/",
+  //   workbox: {
+  //     navigateFallback: undefined
+  //   }
+  // },
+  routeRules: {
+    "/public/**": {
+      headers: {
+        "Access-Control-Allow-Origin": "*"
+      }
+    }
+  },
+  ssr: true,
+  // ui: {
+  //   theme: {
+  //     colors: ["primary", "secondary", "success", "warning", "error", "info", "neutral"]
+  //   }
+  // },
   vite: {
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: "@use '@/assets/styles/variables.scss' as *;"
-          // additionalData: "@import '@/assets/styles/variables.scss';"
+          additionalData: "@use '~/assets/styles/variables.scss' as *;",
+          api: "modern-compiler"
         }
       }
+    },
+    server: {
+      cors: true  // For dev
     }
-  },
-
-  css: [
-    "~/assets/styles/main.scss",
-    // @ts-ignore
-    { src: "bootstrap-icons/font/bootstrap-icons.scss", lang: "scss" }
-  ],
-
-  nitro: {
-    output: {
-      // dir: "public"
-    }
-  },
-
-  // @ts-ignore
-  pwa: {
-
-  },
-
-  // @ts-ignore
-  robots: {
-
   }
 });

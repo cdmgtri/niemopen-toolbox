@@ -1,0 +1,24 @@
+
+header nav span.iconify {
+  color: white !important;
+}
+
+#page-header button:disabled:hover {
+  cursor: auto;
+}
+
+#page-header button:disabled>.iconify, #page-header button:disabled:hover>.iconify {
+  color: var(--ui-text-dimmed) !important;
+}
+
+#page-header button>.iconify:hover:not(.disabled) {
+  color: var(--ui-text-highlighted);
+}
+
+#page-header button.open {
+  background-color: var(--color-niem) !important;
+}
+
+#page-header button.open>.iconify {
+  color: white;
+}
