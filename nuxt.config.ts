@@ -10,8 +10,16 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: "en-US"
       },
+      link: [
+        {
+          rel: "icon",
+          type: "image/x-icon",
+          href: "favicon.ico"
+        }
+      ],
       title: "NIEM Toolbox"
-    }
+    },
+    rootId: "toolbox-app"
   },
   compatibilityDate: '2024-04-03',
   css: [
@@ -21,7 +29,7 @@ export default defineNuxtConfig({
     enabled: true
   },
   icon: {
-    provider: "server",
+    provider: "iconify",
     customCollections: [
       {
         prefix: "app",
@@ -29,28 +37,36 @@ export default defineNuxtConfig({
       }
     ]
   },
-  modules: [
-    '@nuxt/ui',
-    '@vite-pwa/nuxt',
-    '@pinia/nuxt',
-    "@vueuse/nuxt",
-  ],
+  // TODO: include module '@vite-pwa/nuxt'
+  modules: ['@nuxt/ui', '@pinia/nuxt', "@vueuse/nuxt", "@nuxt/content"],
   nitro: {
     prerender: {
       // failOnError: false
     }
   },
-  pwa: {
-    // registerType: "autoUpdate",
-    manifest: {
-      name: "NIEM Toolbox",
-      short_name: "niem-toolbox",
-    },
-    client: {
-      // installPrompt: true
+  // pwa: {
+  //   // registerType: "autoUpdate",
+  //   base: "",
+  //   client: {
+  //     // installPrompt: true
+  //   },
+  //   manifest: {
+  //     name: "NIEM Toolbox",
+  //     lang: "en-US"
+  //   },
+  //   scope: "/",
+  //   workbox: {
+  //     navigateFallback: undefined
+  //   }
+  // },
+  routeRules: {
+    "/public/**": {
+      headers: {
+        "Access-Control-Allow-Origin": "*"
+      }
     }
   },
-  ssr: false,
+  ssr: true,
   // ui: {
   //   theme: {
   //     colors: ["primary", "secondary", "success", "warning", "error", "info", "neutral"]
@@ -64,6 +80,9 @@ export default defineNuxtConfig({
           api: "modern-compiler"
         }
       }
+    },
+    server: {
+      cors: true  // For dev
     }
   }
 });

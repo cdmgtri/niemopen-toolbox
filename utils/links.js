@@ -5,7 +5,14 @@ const niemToolboxBaseUrl = "https://github.com/niemopen/niem-toolbox/";
 
 export const api = {
   baseUrl: apiBaseUrl,
-  transform: apiBaseUrl + "/transforms/models"
+  transform: apiBaseUrl + "transforms/models",
+  migrate: apiBaseUrl + "migration/cmf",
+  validate_xsd: apiBaseUrl + "validation/schemas/xml",
+  validate_ndr: apiBaseUrl + "validation/schemas/ndr",
+  validate_cmf: apiBaseUrl + "validation/cmf/xml",
+  validate_xml: apiBaseUrl + "validation/instances/xml",
+  validate_xml_catalog: apiBaseUrl + "validation/xml-catalog",
+  validate_message_catalog: apiBaseUrl + "validation/message-catalog",
 };
 
 /**
@@ -27,7 +34,7 @@ export const links = {
   brand: {
     to: "/",
     label: "NIEM Toolbox",
-    icon: "material-symbols:edit-note-outline-rounded",
+    icon: "hugeicons:code",
     group: groups.brand
   },
   home: {
@@ -37,25 +44,25 @@ export const links = {
     description: "Use the provided utilities to help manage NIEM data models or to see working demos of NIEM API 2.0 functionality.",
     group: groups.home
   },
+  browse: {
+    to: null,
+    label: "Browse NIEM and community content",
+    icon: "mdi:walk",
+    description: "Browse NIEM and published models top-down.  Look at highlighted NIEM components.",
+    group: groups.tools
+  },
   search: {
     to: null,
-    label: "Discover NIEM and community content",
+    label: "Search NIEM and community content",
     icon: "heroicons:magnifying-glass",
-    description: "Search on specific terms or browse available content.",
+    description: "Search on specific terms, filter results by namespaces, types, and other options.",
     group: groups.tools
   },
   build: {
     to: null,
-    label: "Work on NIEM models",
+    label: "Work on models",
     icon: "heroicons:pencil",
     description: "Build a subset and create extensions.  Reuse components from NIEM and other published models.",
-    group: groups.tools
-  },
-  transform: {
-    to: "/transform",
-    label: "Transform models",
-    icon: "heroicons:arrows-right-left",
-    description: "Convert NIEM models in CMF or NIEM XML Schema into supported formats, including NIEM JSON.",
     group: groups.tools
   },
   validate: {
@@ -63,6 +70,13 @@ export const links = {
     label: "Validate models and artifacts",
     icon: "heroicons:check-circle",
     description: "Check NIEM schemas, sample instances, catalog files, and IEPDs / message specifications.",
+    group: groups.tools
+  },
+  transform: {
+    to: "/transform",
+    label: "Transform models",
+    icon: "heroicons:arrows-right-left",
+    description: "Convert NIEM models in CMF or NIEM XML Schema into supported formats, including NIEM JSON.",
     group: groups.tools
   },
   publish: {
@@ -73,7 +87,8 @@ export const links = {
     group: groups.tools
   },
   migrate: {
-    to: "/migrate",
+    // to: "/migrate",
+    to: null,
     label: "Migrate a model",
     icon: "heroicons:chevron-double-right",
     description: "Update a NIEM subset to a more recent version.",
@@ -131,6 +146,12 @@ export const links = {
     icon: icons.github,
     target: "_blank",
     group: groups.footerRight
+  },
+  apiUI: {
+    to: Config.baseURL + "/swagger-ui/index.html",
+    label: "NIEM API 2.0 REST documentation",
+    target: "_blank",
+    icon: icons.swagger
   },
   cmfTool: {
     to: "https://github.com/niemopen/cmftool",

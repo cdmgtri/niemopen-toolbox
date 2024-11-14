@@ -11,7 +11,7 @@
 
     // Menu items on right
     [
-      getMenuItem(null, icons.settings, groups.siteSettings)
+      getMenuItem(null, icons.menu, groups.siteSettings)
     ]
   ];
 
@@ -30,7 +30,9 @@
 <style lang="scss" scoped>
 
 nav .iconify {
-  color: var(--ui-text-muted) !important;
+  // TODO: Check hosted navbar colors
+  color: white !important;
+  // color: var(--ui-text-muted) !important;
 }
 
 </style>

@@ -1,51 +1,76 @@
 
 <template>
-  <NuxtLayout>
-    <template #header>
-      <PageHeader :link="links.home">
-        <template #user>
-          USER INFO
-        </template>
-        <template #developer>
-          DEVELOPER INFO
-        </template>
-        <template #preferences>
-          PREFERENCES
-        </template>
-      </PageHeader>
+  <PageHeader :link="links.home">
+    <template #info>
+      <p>
+        Use the provided utilities to help manage NIEM data models or to see working demos of NIEM API 2.0 functionality.
+      </p>
+
+      <p>
+        This application is under development.  It is open source and will be a replacement for SSGT, Migration Tool, and ConTesA functionality.
+      </p>
+
+      <p class="font-medium">Tips:</p>
+
+      <ul class="bullets">
+        <li>
+          Toggle the page buttons to open or close the panel.  The button is blue when the panel is open.
+        </li>
+      </ul>
+
+      <p class="font-medium">Report bugs:</p>
+
+      <ul class="bullets">
+        <li>
+          Create an issue on the repo at <CustomLink :link="links.toolboxRepo"/> <span class="font-light text-xs">(GitHub account required)</span>
+        </li>
+        <li>
+          Submit a report through <CustomLink :link="links.contact"/>
+        </li>
+      </ul>
     </template>
 
-    <template #default>
-      <div>
-        <UCard v-for="page in getLinks(groups.tools)" :ui="ui">
-          <!-- Page icon -->
-          <UIcon :name="page.icon" class="mr-2"/>
+    <template #developer>
+      <p>
+        See the developer information panels on each of the utility pages for information on how to make the corresponding API calls.
+      </p>
 
-          <!-- Page title as link if available... -->
-          <span v-if="page.to">
-            <ULink :to="page.to" class="label-link font-semibold">{{ page.label }}</ULink>
-            <UBadge color="warning" variant="subtle" class="ml-2 align-top">alpha</UBadge>
-          </span>
-          <!-- ...otherwise page title as text -->
-          <span v-else class="label-text">
-            <span class="font-semibold">{{ page.label }}</span>
-            <UBadge color="neutral" variant="outline" class="ml-2 align-top">future</UBadge>
-          </span>
-
-
-          <!-- Page description -->
-          <p class="label-description">{{ page.description }}</p>
-        </UCard>
-      </div>
+      <p>
+        The Swagger UI and OpenAPI JSON file are available at <CustomLink :link="links.apiUI"/>.
+      </p>
     </template>
-  </NuxtLayout>
+
+    <template #preferences>
+      <p>Page-specific preferences will be available in this panel.</p>
+    </template>
+  </PageHeader>
+
+  <UCard v-for="page in getLinks(groups.tools)" :ui="ui">
+    <!-- Page icon -->
+    <UIcon :name="page.icon" class="mr-2"/>
+
+    <!-- Page title as link if available... -->
+    <span v-if="page.to">
+      <ULink :to="page.to" class="label-link font-semibold">{{ page.label }}</ULink>
+      <UBadge color="warning" variant="subtle" class="ml-2 align-top">alpha</UBadge>
+    </span>
+    <!-- ...otherwise page title as text -->
+    <span v-else class="label-text">
+      <span class="font-semibold">{{ page.label }}</span>
+      <UBadge color="neutral" variant="outline" class="ml-2 align-top">future</UBadge>
+    </span>
+
+
+    <!-- Page description -->
+    <p class="label-description">{{ page.description }}</p>
+  </UCard>
 
 </template>
 
 <script setup>
 
 const ui = {
-  body: "p-x-1 sm:p-x-1 p-y-1 sm:p-y-1"
+  body: "sm:p-5 p-5"
 }
 
 </script>

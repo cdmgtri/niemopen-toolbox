@@ -9,10 +9,19 @@ export default defineAppConfig({
       error: "red",
       neutral: "zinc"
     },
+    // TODO: Formatting didn't pick up
+    button: {
+      slots: {
+        base: "bg-[var(--color-niem)]"
+      }
+    },
     formField: {
       slots: {
         help: "mt-1 font-light"
       }
+    },
+    icons: {
+      // dynamic: true
     },
     input: {
       slots: {

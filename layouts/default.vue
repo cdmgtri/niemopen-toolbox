@@ -3,14 +3,16 @@
   <header>
     <PageNavbar/>
   </header>
+
   <main>
-    <slot name="header"/>
-    <div id="contents">
+    <div id="page-header"/>
+    <div id="page-contents">
       <slot/>
     </div>
     <!-- TODO: Replace scroll top component -->
     <!-- <PageFooterScrollTop /> -->
   </main>
+
   <footer>
     <PageFooter/>
   </footer>
@@ -19,6 +21,7 @@
 <style scoped lang="scss">
 
   header, main, footer {
+    max-width: 1048px;
     padding: 0 36px !important;
     width: 100%;
   }
@@ -37,10 +40,10 @@
     margin-bottom: 60px;
   }
 
-  #contents {
+  #page-contents {
+    margin-top: 24px;
     position: relative;
     z-index: 0;
-
   }
 
   footer {

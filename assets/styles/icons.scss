@@ -1,16 +1,24 @@
 
-button>.iconify.disabled {
-  color: var(--ui-text-dimmed);
+header nav span.iconify {
+  color: white !important;
 }
 
-button>.iconify:hover:not(.disabled) {
+#page-header button:disabled:hover {
+  cursor: auto;
+}
+
+#page-header button:disabled>.iconify, #page-header button:disabled:hover>.iconify {
+  color: var(--ui-text-dimmed) !important;
+}
+
+#page-header button>.iconify:hover:not(.disabled) {
   color: var(--ui-text-highlighted);
 }
 
-button:has(> .iconify.open) {
-  background-color: var(--color-neutral-200);
+#page-header button.open {
+  background-color: var(--color-niem) !important;
 }
 
-.iconify.open {
-  color: var(--ui-text-highlighted);
+#page-header button.open>.iconify {
+  color: white;
 }

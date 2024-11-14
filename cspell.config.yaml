@@ -8,6 +8,7 @@ words:
   - divs
   - favicons
   - heroicons
+  - hugeicons
   - iconify
   - niemopen
   - nuxt
@@ -17,6 +18,7 @@ words:
   - pinia
   - pwa
   - Slideover
+  - tabler
   - tailwindcss
   - ui
   - Vite

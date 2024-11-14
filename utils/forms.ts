@@ -6,7 +6,7 @@ export function initFormErrors(): FormError<string>[] {
 }
 
 export function validateRequiredFormField(errors: FormError<string>[], name: string, value: any) {
-  if (!value) {
+  if (name && !value) {
     errors.push({
       name,
       message: "Required"

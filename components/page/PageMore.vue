@@ -1,8 +1,12 @@
 <template>
   <div>
     <USeparator :decorative="true" class="my-2"/>
-    <CustomIconTitle :icon="icon" :title="title" classes="page-header-title font-semibold ml-3"/>
-    <div class="mx-9 mt-2 text-sm">
+
+    <!-- Panel title -->
+    <CustomIconTitle :icon="icon" :title="title" classes="page-header-title font-semibold ml-3 color-niem"/>
+
+    <!-- Panel contents passed in from parent component -->
+    <div class="more mt-2 text-sm spaced-sm">
       <slot :name="slot"/>
     </div>
   </div>
@@ -26,3 +30,11 @@ const props = defineProps({
 });
 
 </script>
+
+<style lang="scss" scoped>
+
+.more {
+  margin-left: 33px;
+}
+
+</style>

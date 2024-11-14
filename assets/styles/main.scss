@@ -1,6 +1,9 @@
 
 /* TODO: Clean up styles */
 
+// @use "tailwindcss";
+// @import "@nuxt/ui";
+
 @import url("icons.scss");
 // @import url("variables.scss");
 
@@ -12,22 +15,31 @@ a[href] {
   color: #00709A;
 }
 
-a[href]:hover {
+a[href]:state(hover) {
   color: #00709A;
   font-weight: bolder;
 }
 
-button:active {
+// TODO: button:active styling
+// button:active {
   // background-color: dimgray !important;
   // color: white !important;
+// }
+
+button:state(hover) {
+  font-weight: bolder;
 }
 
-button:hover {
-  font-weight: bolder;
+.color-niem {
+  color: var(--color-niem);
 }
 
 form > *:not(:first-child), .spaced > *:not(:first-child) {
   margin-top: var(--app-vertical-spacer);
+}
+
+form.sm > *:not(:first-child), .spaced-sm > *:not(:first-child) {
+  margin-top: var(--app-vertical-spacer-sm);
 }
 
 h1 {
@@ -61,7 +73,12 @@ kbd {
   font-weight: bolder !important;
 }
 
-li.bullets {
-  @apply list-disc;
-  @apply list-outside;
+ul.bullets {
+  // TODO: Figure out how to apply classes
+  // @apply list-disc;
+  // @apply list-outside;
+  // @apply ml5;
+  list-style-type: disc;
+  list-style-position: outside;
+  margin-left: 18px;
 }

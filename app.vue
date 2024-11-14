@@ -1,19 +1,18 @@
 
 <template>
-  <NuxtPwaManifest/>
   <NuxtRouteAnnouncer />
   <UApp>
-    <NuxtPage/>
+    <ClientOnly>
+      <NuxtLayout>
+        <NuxtPage/>
+      </NuxtLayout>
+    </ClientOnly>
   </UApp>
 </template>
 
 <script setup lang="ts">
 
 await callOnce(async () => {
-  // Set some content defaults
-  let toolbox = useToolboxStore();
-  await toolbox.loadDefaults();
-  console.log("Loaded defaults from app.vue");
 });
 
 </script>
@@ -31,4 +30,5 @@ await callOnce(async () => {
     --color-primary: var(--ui-primary);
     --color-secondary: var(--ui-secondary);
   }
+
 </style>

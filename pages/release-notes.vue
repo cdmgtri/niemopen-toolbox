@@ -1,28 +1,24 @@
 
 <template>
-  <NuxtLayout>
+  <PageHeader :link="links.releaseNotes"/>
+
+  <UCard v-for="note in notes" :key="note.header" class="card">
     <template #header>
-      <PageHeader :link="links.releaseNotes"/>
+      <h2>{{ note.header }}</h2>
     </template>
 
-    <UCard v-for="note in notes" :key="note.header" class="card">
-      <template #header>
-        <h2>{{ note.header }}</h2>
-      </template>
-
-      <div v-if="note.features">
-        <h3>Features</h3>
-        <ul class="ml-5">
-          <li v-for="feature in note.features" class="bullets">
-            <span class="feature-summary">{{ feature.summary }}</span>
-            <p v-if="feature.description" class="feature-description">
-              {{ feature.description }}
-            </p>
-          </li>
-        </ul>
-      </div>
-    </UCard>
-  </NuxtLayout>
+    <div v-if="note.features">
+      <h3>Features</h3>
+      <ul class="ml-5">
+        <li v-for="feature in note.features" class="bullets">
+          <span class="feature-summary">{{ feature.summary }}</span>
+          <p v-if="feature.description" class="feature-description">
+            {{ feature.description }}
+          </p>
+        </li>
+      </ul>
+    </div>
+  </UCard>
 </template>
 
 <script setup>
@@ -36,12 +32,12 @@
 */
 const notes = [
   {
-    header: "Alpha 2: 2024-10-28",
+    header: "Alpha 2: 2024-11-14",
     features: [
-      {
-        summary: "Migrate NIEM subsets",
-        description: "Migrate a NIEM subset in a CMF file to a more recent version of NIEM."
-      },
+      // {
+      //   summary: "Migrate NIEM subsets",
+      //   description: "Migrate a NIEM subset in a CMF file to a more recent version of NIEM."
+      // },
       {
         summary: "Validate NIEM XSD",
         description: "Validate NIEM XML schemas and check for NDR conformance."
@@ -77,7 +73,7 @@ const notes = [
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 
   .card {
     margin-bottom: 18px;
