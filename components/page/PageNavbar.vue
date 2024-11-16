@@ -3,17 +3,19 @@
   <UNavigationMenu :items="items" class="flex justify-between h-12 bg-[var(--color-niem)] p-4" variant="link" :ui="ui"/>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { NavigationMenuItem } from '@nuxt/ui';
+
 
   const items = [
     // Brand on left
-    getLinks(groups.brand),
+    [AppItems.brand],
 
     // Menu items on right
     [
-      getMenuItem(null, icons.menu, groups.siteSettings)
+      AppMenuItem(undefined, icons.menu, AppItemGroups.siteMenuItems)
     ]
-  ];
+  ] as NavigationMenuItem[];
 
   const ui = {
     // Display drop-down as single small (not full width) column on right
@@ -26,13 +28,3 @@
   };
 
 </script>
-
-<style lang="scss" scoped>
-
-nav .iconify {
-  // TODO: Check hosted navbar colors
-  color: white !important;
-  // color: var(--ui-text-muted) !important;
-}
-
-</style>

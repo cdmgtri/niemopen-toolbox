@@ -7,27 +7,18 @@
 
     <!-- Panel contents passed in from parent component -->
     <div class="more mt-2 text-sm spaced-sm">
-      <slot :name="slot"/>
+      <slot :name="slotName"/>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
-const props = defineProps({
-  icon: {
-    type: String,
-    required: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  slot: {
-    type: String,
-    required: true
-  }
-});
+const { icon, title, slotName } = defineProps<{
+  icon: string,
+  title: string,
+  slotName: string
+}>();
 
 </script>
 

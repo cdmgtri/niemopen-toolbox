@@ -6,22 +6,11 @@
   </span>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
-const props = defineProps({
-  icon: {
-    type: String,
-    required: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  classes: {
-    type: String,
-    required: false,
-    default: ""
-  }
-});
+const { icon, title, classes = "" } = defineProps<{
+  icon: string,
+  title: string,
+  classes?: string }>();
 
 </script>

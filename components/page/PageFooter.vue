@@ -4,11 +4,14 @@
   <UNavigationMenu :items="items" class="justify"/>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
 const items = [
-  getLinks(groups.footerLeft),
-  getLinks(groups.footerRight)
+  // Toolbox repo on left
+  [AppItems.toolboxRepo],
+
+  // Other references on right
+  AppItemGroups.footerRightItems
 ];
 
 </script>

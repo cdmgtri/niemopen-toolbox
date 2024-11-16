@@ -1,6 +1,6 @@
 
 <template>
-  <PageHeader :link="links.releaseNotes"/>
+  <PageHeader :page="AppItems.releaseNotes"/>
 
   <UCard v-for="note in notes" :key="note.header" class="card">
     <template #header>
@@ -21,16 +21,15 @@
   </UCard>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
-/**
-  @type{{
-    header: string,
-    features?: {summary: string, description?: string}[],
-    fixes?: string[]
-  }[]}
-*/
-const notes = [
+type NoteType = {
+  header: string,
+  features?: {summary: string, description?: string}[]
+  fixes?: string[]
+}
+
+const notes: NoteType[] = [
   {
     header: "Alpha 2: 2024-11-14",
     features: [

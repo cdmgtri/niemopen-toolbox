@@ -9,17 +9,6 @@
 
 <script setup lang="ts">
 
-  const props = defineProps({
-    icon: {
-      type: String,
-      required: false,
-      default: icons.fileUpload
-    },
-    id: {
-      type: String,
-      required: false,
-      default: "file"
-    }
-  });
+  const { icon = icons.upload, id = "file" } = defineProps<{icon?: string, id?: string}>();
 
 </script>

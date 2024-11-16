@@ -1,7 +1,7 @@
 
 <template>
-  <PageHeader :link="links.home">
-    <template #info>
+  <PageHeader :page="AppItems.home">
+    <template #user>
       <p>
         Use the provided utilities to help manage NIEM data models or to see working demos of NIEM API 2.0 functionality.
       </p>
@@ -22,10 +22,10 @@
 
       <ul class="bullets">
         <li>
-          Create an issue on the repo at <CustomLink :link="links.toolboxRepo"/> <span class="font-light text-xs">(GitHub account required)</span>
+          Create an issue on the repo at <CustomLink :link="AppItems.toolboxRepo"/> <span class="font-light text-xs">(GitHub account required)</span>
         </li>
         <li>
-          Submit a report through <CustomLink :link="links.contact"/>
+          Submit a report through <CustomLink :link="AppItems.contact"/>
         </li>
       </ul>
     </template>
@@ -36,7 +36,7 @@
       </p>
 
       <p>
-        The Swagger UI and OpenAPI JSON file are available at <CustomLink :link="links.apiUI"/>.
+        The Swagger UI and OpenAPI JSON file are available at <CustomLink :link="AppItems.apiSwaggerUI"/>.
       </p>
     </template>
 
@@ -45,7 +45,7 @@
     </template>
   </PageHeader>
 
-  <UCard v-for="page in getLinks(groups.tools)" :ui="ui">
+  <UCard v-for="page in AppItemGroups.tools" :ui="ui">
     <!-- Page icon -->
     <UIcon :name="page.icon" class="mr-2"/>
 
@@ -67,7 +67,7 @@
 
 </template>
 
-<script setup>
+<script setup lang="ts">
 
 const ui = {
   body: "sm:p-5 p-5"
@@ -77,15 +77,15 @@ const ui = {
 
 <style lang="css" scoped>
 
-  .iconify {
-    color: var(--ui-text-muted);
-  }
+.iconify {
+  color: var(--ui-text-muted);
+}
 
-  .label-description {
-    font-size: smaller;
-    color: slategray;
-    font-weight: 400;
-    margin-left: 24px;
-  }
+.label-description {
+  font-size: smaller;
+  color: slategray;
+  font-weight: 400;
+  margin-left: 24px;
+}
 
 </style>

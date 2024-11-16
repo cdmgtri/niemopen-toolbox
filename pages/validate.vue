@@ -1,7 +1,7 @@
 
 <template>
-  <PageHeader :link="links.validate">
-    <template #info>
+  <PageHeader :page="AppItems.validate">
+    <template #user>
       <p>
         Validate NIEM artifacts and check NDR conformance.
       </p>
@@ -172,7 +172,7 @@ const validationMenuItems: ValidationKindType[] = [
     extensions: ["xsd", "zip"],
     icon: icons.book,
     group: "XSD",
-    route: api.validate_ndr,
+    route: API.routes.validate_ndr,
     file1: {
       fileType: "XSD | ZIP",
       icon: icons.xml,
@@ -189,7 +189,7 @@ const validationMenuItems: ValidationKindType[] = [
     extensions: ["xsd", "zip"],
     icon: icons.xml,
     group: "XSD",
-    route: api.validate_xsd,
+    route: API.routes.validate_xsd,
     file1: {
       fileType: "XSD | ZIP",
       icon: icons.xml,
@@ -234,7 +234,7 @@ const validationMenuItems: ValidationKindType[] = [
     extensions: ["xml"],
     icon: icons.xml,
     group: "XML",
-    route: api.validate_xml,
+    route: API.routes.validate_xml,
     file1: {
       fileType: "CMF | XML",
       icon: icons.xml,
@@ -259,7 +259,7 @@ const validationMenuItems: ValidationKindType[] = [
     extensions: ["xml"],
     icon: icons.xml,
     group: "XML",
-    route: api.validate_message_catalog,
+    route: API.routes.validate_message_catalog,
     file1: {
       fileType: "XML",
       icon: icons.xml,
@@ -276,7 +276,7 @@ const validationMenuItems: ValidationKindType[] = [
     extensions: ["xml"],
     icon: icons.xml,
     group: "XML",
-    route: api.validate_xml_catalog,
+    route: API.routes.validate_xml_catalog,
     file1: {
       fileType: "XML",
       icon: icons.xml,
@@ -298,19 +298,7 @@ const selectedKind = computed(() => {
   return validationItems.find(item => item.value == state.kind);
 })
 
-// TODO: Make a reusable results format object and filter desired items per use
-const mediaTypeItems: SelectItem[] = [
-  {
-    value: "json",
-    label: "JSON",
-    icon: icons.json
-  },
-  {
-    value: "csv",
-    label: "CSV",
-    icon: icons.csv
-  }
-]
+const mediaTypeItems = API.reportMediaTypes;
 
 // TODO: Extract to a reusable result icon function
 const mediaTypeIcon = computed(() => {
@@ -319,7 +307,7 @@ const mediaTypeIcon = computed(() => {
   }
 })
 
-const mediaType = computed(() => state.mediaType != "json" ? `?mediaType=${state.mediaType}` : "");
+const mediaType = computed(() => API.mediaTypeQueryString(state.mediaType));
 
 const validationResults = reactive<ValidationResults>({
   tests: [],

@@ -1,26 +1,39 @@
 
+// TODO: Review and consolidate icon packages
+
 export default {
-  developer: "bi:journal-code",
-  preferences: "bi:sliders",
-  menu: "material-symbols:menu",
-  settings: "heroicons:cog-6-tooth",
-  user: "heroicons:user-circle",
+  // Miscellaneous
   book: "material-symbols:menu-book-outline",
   issue: "material-symbols:bug-report-outline",
-  fileUpload: "material-symbols-light:upload-file-outline",
-  fileDownload: "material-symbols-light:download-file-outline",
-  error: "material-symbols:error-circle-rounded-outline-sharp",
   history: "material-symbols:history-2",
   journal: "bi:journal-text",
   externalLink: "i-heroicons:arrow-up-right-20-solid",
   standard: "material-symbols:book-2-outline-rounded",
 
+  // Pages
+  home: "bi:house",
+  help: "heroicons:question-mark-circle",
+  releaseNotes: "octicon:diff",
+  browse: "mdi:walk",
+  search: "heroicons:magnifying-glass",
+  build: "heroicons:pencil",
+  validate: "heroicons:check-circle",
+  transform: "heroicons:arrows-right-left",
+  publish: "heroicons:cloud-arrow-up",
+  migrate: "heroicons:chevron-double-right",
+
+  // Menu items
+  user: "heroicons:user-circle",
+  developer: "bi:journal-code",
+  preferences: "bi:sliders",
+  menu: "material-symbols:menu",
+  settings: "heroicons:cog-6-tooth",
+
+  // Statuses
   info: "material-symbols:info-outline",
   success: "material-symbols:check-circle-outline",
   error: "material-symbols:error-circle-rounded",
   warning: "material-symbols:warning",
-  help: "heroicons:question-mark-circle",
-  close: "i-heroicons-x-mark-20-solid",
   pending: "material-symbols:pending-outline",
   unsent: "material-symbols:indeterminate-question-box",
 
@@ -30,20 +43,23 @@ export default {
   less: "material-symbols:expand-less-rounded",
   map: "material-symbols:equal-rounded",
   copy: "material-symbols:content-copy-outline-rounded",
+  close: "i-heroicons-x-mark-20-solid",
+  upload: "material-symbols-light:upload-file-outline",
+  download: "material-symbols-light:download-file-outline",
+
+  // Directions and locations
   start: "material-symbols:not-started-rounded",
   end: "material-symbols:stop-circle-rounded",
-
   down: "material-symbols:keyboard-arrow-down-rounded",
   up: "material-symbols:keyboard-arrow-up-rounded",
   left: "material-symbols:keyboard-arrow-left-rounded",
   right: "material-symbols:keyboard-arrow-right-rounded",
 
-  // Brands
+  // Site brands
   github: "mdi:github",
   youtube: "mdi:youtube",
   swagger: "simple-icons:swagger",
-
-  // Sites
+  toolbox: "hugeicons:code",
   niemopen: "gravity-ui:nodes-down",
 
   // Formats
@@ -53,4 +69,5 @@ export default {
   owl: "material-symbols:owl-outline-rounded",
   zip: "material-symbols:folder-zip-outline-rounded",
   csv: "material-symbols:csv-outline-rounded"
-};
+
+} as const;

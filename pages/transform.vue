@@ -1,13 +1,13 @@
 
 <template>
-  <PageHeader :link="links.transform">
-    <template #info>
+  <PageHeader :page="AppItems.transform">
+    <template #user>
       <p>
         Transform a NIEM subset, schema, IEPD schemas, or message model in either CMF or NIEM XML Schema to another supported format.
       </p>
 
       <p>
-        This functionality leverages the <CustomLink :link="links.cmfTool"/> <UKbd>version 0.7-alpha.6</UKbd> which supports <CustomLink :link="links.cmf"/> <UKbd>version 0.8</UKbd>.
+        This functionality leverages the <CustomLink :link="AppItems.cmfToolRepo"/> <UKbd>version 0.7-alpha.6</UKbd> which supports <CustomLink :link="AppItems.cmfRepo"/> <UKbd>version 0.8</UKbd>.
       </p>
 
       <p class="font-medium">Tips:</p>
@@ -40,14 +40,17 @@
 
       <!-- Input file -->
       <UFormField
-      name="file" required :error="fileError"
-      label="1. Select a model input file"
-      help="Do not upload sensitive or distribution-restricted files."
+        name="file" required :error="fileError"
+        label="1. Select a model input file"
+        help="Do not upload sensitive or distribution-restricted files."
       >
         <UButtonGroup>
+          <!-- File input -->
           <CustomFileInput @change="onFileChange" class="w-[600px]">
             <template #trailing>(CMF | XSD | ZIP)</template>
           </CustomFileInput>
+
+          <!-- Demo drop down button -->
           <UButton color="neutral" variant="subtle" label="Demo"/>
           <UDropdownMenu :items="demoItems">
             <UButton color="neutral" variant="subtle" :icon="icons.down"/>
@@ -115,7 +118,8 @@ const fromItems = [
   }
 ];
 
-const toItems = fromItems.concat([
+const toItems = [
+  ...fromItems,
   {
     value: "json_schema",
     label: "JSON Schema",
@@ -126,7 +130,7 @@ const toItems = fromItems.concat([
     label: "OWL",
     icon: icons.owl
   }
-]);
+];
 
 const fromIcon = computed(() => {
   return fromItems.find(item => item.value == state.from)?.icon;
@@ -137,7 +141,7 @@ const toIcon = computed(() => {
 });
 
 
-const code = computed(() => `curl -i -X POST -H "Content-Type: multipart/form-data" -F from=${ state.from } -F to=${ state.to } -F file=@${ state.file?.name } ${ api.transform }`);
+const code = computed(() => `curl -i -X POST -H "Content-Type: multipart/form-data" -F from=${ state.from } -F to=${ state.to } -F file=@${ state.file?.name } ${ API.routes.transform }`);
 
 const demoItems : DropdownMenuItem[] = [
   {
@@ -230,7 +234,7 @@ async function onSubmit() {
   console.log("Sending transform request", state.from, state.to, state.file);
 
   // API request
-  const response = await fetch(api.transform, {
+  const response = await fetch(API.routes.transform, {
     body: getFormBody(state),
     method: "post"
   });

@@ -1,29 +1,17 @@
+import type { LinkProps } from "@nuxt/ui";
 import type { PanelCategory } from "~/utils/app"
 
 declare global {
 
-  type LinkType = {
+  type IconKeyType = keyof typeof icons;
+  type IconType = typeof icons[IconKeyType];
 
-    /** Internal route or external url */
-    to: string,
-
-    /** Link text */
+  type AppLinkType = LinkProps & {
+    value: "brand" | "home" | ToolType | SiteSettingsType | ReferenceType,
     label: string,
-
-    icon?: string,
-
-    target?: string,
-
     description?: string,
-
-    group?: string,
-
-    disabled?: boolean,
-
-    children?: LinkType[]
-
+    icon: IconType
   }
-
 
   type ResultsCategory = "success" | "error" | "warning" | "info" | "pending" | "unsent";
 

@@ -1,7 +1,7 @@
 
 <template>
-  <PageHeader :link="links.migrate">
-    <template #info>
+  <PageHeader :page="AppItems.migrate">
+    <template #user>
       <p>
         Migrate a NIEM subset to a more recent version of NIEM.
       </p>
@@ -103,7 +103,7 @@ const toItems = computed(() => {
   }
 });
 
-const code = computed(() => `curl -i -X POST -H "Content-Type: multipart/form-data" -F from=${ state.from } -F to=${ state.to } -F file=@${ state.file?.name } ${ api.migrate }`);
+const code = computed(() => `curl -i -X POST -H "Content-Type: multipart/form-data" -F from=${ state.from } -F to=${ state.to } -F file=@${ state.file?.name } ${ API.routes.migrate }`);
 
 
 const fileError = ref("");
@@ -156,7 +156,7 @@ async function onSubmit() {
   console.log("Sending migration request", state.from, state.to, state.file);
   let start = Date.now();
 
-  const response = await fetch(api.migrate, {
+  const response = await fetch(API.routes.migrate, {
     body: getFormBody(state),
     method: "post"
   });

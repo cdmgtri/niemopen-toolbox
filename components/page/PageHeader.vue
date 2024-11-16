@@ -8,56 +8,31 @@
 
       <!-- Header buttons -->
       <span class="gap-1.5">
-        <!-- TODO: Slot for NIEM version select box -->
+        <!-- LATER: Slot for NIEM version select box -->
 
-        <!-- TODO: Slot for additional page buttons -->
+        <!-- LATER: Slot for additional page buttons -->
 
         <UButtonGroup size="sm" id="page-header-buttons">
-          <UTooltip v-for="id in buttonItems" :text="tooltip(id)">
+          <UTooltip v-for="panel in panels" :text="panel.description">
+
             <UButton
               color="neutral" variant="outline"
-              :id="'btn-' + id"
-              :icon="icons[id]"
-              :disabled="!$slots[id]"
+              :id="'btn-' + panel.value"
+              :icon="panel.icon"
+              :disabled="!$slots[panel.value]"
               @click="toggle"
-              v-bind:class="{ 'open': showPanel == id }"
+              v-bind:class="{ 'open': activePanelID == panel.value }"
             />
           </UTooltip>
         </UButtonGroup>
       </span>
     </div>
 
-    <div id="page-header-more">
-
-      <!-- TODO: Fix dynamic template / slot names -->
-<!--
-      <div v-for="panel in panelItems">
-        <PageMore v-if="showPanel==panel.id" :icon="icons[panel.id]" :title="panel.title" slot="panel.id">
-          <template #[panel.id]>
-            <slot :name="panel.id"/>
-          </template>
-        </PageMore>
-      </div>
--->
-
-      <!-- User information panel -->
-      <PageMore v-if="showPanel=='info'" :icon="icons.info" title="User information" slot="info">
-        <template #info>
-          <slot name="info"/>
-        </template>
-      </PageMore>
-
-      <!-- Developer information panel -->
-      <PageMore v-if="showPanel=='developer'" :icon="icons.developer" title="Developer information" slot="developer">
-        <template #developer>
-          <slot name="developer"/>
-        </template>
-      </PageMore>
-
-      <!-- Preferences panel -->
-      <PageMore v-if="showPanel=='preferences'" :icon="icons.preferences" title="Preferences" slot="preferences">
-        <template #preferences>
-          <slot name="preferences"/>
+    <!-- Display user info, developer info, or preferences if clicked -->
+    <div id="page-header-more" v-if="activePanel && activePanelID">
+      <PageMore :icon="activePanel.icon" :title="activePanel.label" :slotName="activePanelID">
+        <template #[activePanelID]>
+          <slot :name="activePanelID"/>
         </template>
       </PageMore>
     </div>
@@ -70,68 +45,61 @@
 
 import { ref } from 'vue';
 
-const props = defineProps({
-  link: {
-    type: Object,
-    required: true,
-    default: null
+const { page } = defineProps<{
+  page: AppLinkType
+}>();
+
+type PanelIDType = "user" | "developer" | "preferences";
+
+const panels: AppLinkType[] = [
+  {
+    value: "user",
+    label: "User information",
+    icon: icons.user
+  },
+  {
+    value: "developer",
+    label: "Developer information",
+    icon: icons.developer
+  },
+  {
+    value: "preferences",
+    label: "Page preferences",
+    icon: icons.preferences
   }
-});
+]
 
-/**
- * Get the title, description, icon, etc., for the current page
- * @type {LinkType}
- */
-const page = props.link;
+const activePanelID: Ref<PanelIDType | undefined> = ref(undefined);
 
-// User, developer, or preferences panel to display.  Default to "none" to hide.
-const showPanel = ref("none");
+const activePanel: ComputedRef<AppLinkType|undefined> = computed(() => {
+  return panels.find(panel => panel.value == activePanelID.value);
+})
 
 function toggle(e: Event) {
   const element = e.currentTarget as HTMLElement
-  const selectedPanel = element.id.replace("btn-", "");
-  showPanel.value = showPanel.value == selectedPanel ? "none" : selectedPanel;
-}
-
-const buttonItems : (keyof typeof icons)[] = [ "info", "developer", "preferences" ];
-
-const panelItems = [
-  {
-    id: "info",
-    title: "User information"
-  },
-  {
-    id: "developer",
-    title: "Developer information"
-  },
-  {
-    id: "preferences",
-    title: "Preferences"
-  }
-];
-
-function tooltip(id: string) {
-  return panelItems.find(item => item.id == id)?.title;
+  const selectedPanelID = element.id.replace("btn-", "") as PanelIDType;
+  activePanelID.value = activePanelID.value == selectedPanelID ? undefined : selectedPanelID;
 }
 
 </script>
 
 <style lang="scss">
 
-  #page-header {
-    background-color: var(--color-light);
-    border: 1px solid gainsboro;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    padding: 10px 30px 10px 16px;
-  }
+// Style is unscoped to support styles on teleport.
 
-  .page-header-title {
-    margin-left: 12px;
-  }
+#page-header {
+  background-color: var(--color-light);
+  border: 1px solid gainsboro;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  padding: 10px 30px 10px 16px;
+}
 
-  #page-header button {
-    background-color: white;
-  }
+.page-header-title {
+  margin-left: 12px;
+}
 
+#page-header button {
+  background-color: white;
+}
 </style>
