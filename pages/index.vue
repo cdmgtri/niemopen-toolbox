@@ -45,7 +45,7 @@
     </template>
   </PageHeader>
 
-  <UCard v-for="page in AppItemGroups.tools" :ui="ui">
+  <UCard v-for="page in AppTools" :ui="ui">
     <!-- Page icon -->
     <UIcon :name="page.icon" class="mr-2"/>
 

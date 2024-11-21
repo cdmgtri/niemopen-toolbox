@@ -37,7 +37,6 @@
 
     </template>
 
-    <!-- TODO: Add developer information -->
     <template #developer>
       <CustomCodePanel title="POST request" :code="code"/>
     </template>
@@ -45,53 +44,68 @@
 
   <UCard>
 
-    <UForm :state="state" :validate="validate" @submit.prevent="onSubmit" enctype="multipart/form-data">
+    <UForm ref="form"
+    :state="state"
+    :validate="validate"
+    @submit.prevent="onSubmit" enctype="multipart/form-data"
+    >
 
-      <!-- Select validation type -->
+      <!-- 1. Select validation type -->
       <UFormField
-        name="kind" required
-        label="1. Select validation kind"
-        :help="selectedKind?.description"
+      name="kind" required
+      label="1. Select validation kind"
+      :help="validationItem?.description"
       >
-        <USelect v-model="state.kind" :items="validationMenuItems" :icon="selectedKind?.icon" class="w-64"/>
+        <USelect v-model="state.kind" :items="validationMenuItems" @change="onValidationKindChange" :icon="validationItem?.icon" class="w-64"/>
       </UFormField>
 
-      <!-- Select result format -->
+      <!-- 2. Select result format -->
       <UFormField
-        name="mediaType" required
-        label="2. Select results format"
+      name="mediaType" required
+      label="2. Select results format"
       >
         <USelect v-model="state.mediaType" :items="mediaTypeItems" :icon="mediaTypeIcon"  class="w-64"/>
       </UFormField>
 
-      <!-- Required first input file -->
-      <UFormField
-        name="file1" required
-        label="3. Select a file to validate"
-        :help="getFileHelp(selectedKind?.file1?.description)"
-      >
-        <UButtonGroup>
-          <CustomFileInput @change="onFile1Change" class="w-[600px]" :icon="selectedKind?.file1?.icon" id="file1">
-            <template #trailing>({{ selectedKind?.file1?.fileType }})</template>
-          </CustomFileInput>
+      <!-- 3. Required File 1 -->
+      <UFormField name="file1" required label="3. Select a file to validate" :help="fileHelp(validationItem?.file1?.description)">
 
-          <UButton color="neutral" variant="subtle" label="Demo"/>
-          <UDropdownMenu :items="demoItems" :disabled="state.kind == undefined">
-            <UButton color="neutral" variant="subtle" :icon="icons.down"/>
-          </UDropdownMenu>
-        </UButtonGroup>
+        <!-- File 1 -->
+        <span v-if="inputMode=='upload'">
+
+          <!-- File 1 as upload -->
+          <UInput type="file" @change="onFile1Change" :accept="validationItem?.file1?.validExtensions" :icon="validationItem?.file1?.icon || icons.upload" :ui="ui.inputFileInGroup">
+            <template #trailing>{{ file1TypeLabel }}</template>
+          </UInput>
+        </span>
+
+        <!-- File 1 as demo file -->
+        <span v-else>
+          <UInput v-model="demoFile1" :ui="ui.inputFileInGroup" :icon="icons.magic"/>
+        </span>
+
+        <!-- Select upload file or demo file option -->
+        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode" :icon="inputModelSelectedItem?.icon"/>
+
       </UFormField>
 
-      <!-- Optional second input file -->
+      <!-- 4. Optional File 2 -->
       <UFormField
-        v-if="selectedKind?.file2"
-        name="file2"
-        label="4. Select supporting file for validation"
-        :help="selectedKind?.file2.description + ' | ' + FILE_UPLOAD_WARNING"
+      v-if="validationItem?.file2"
+      name="file2"
+      label="4. Select supporting file for validation"
+      :help="fileHelp(validationItem.file2.description)"
       >
-        <CustomFileInput @change="onFile2Change" class="w-[600px]" :icon="selectedKind?.file2?.icon" id="file2">
-          <template #trailing>({{ selectedKind.file2?.fileType }})</template>
-        </CustomFileInput>
+
+        <!-- File 2 as upload -->
+        <UInput v-if="inputMode=='upload'" type="file" @change="onFile2Change" :accept="validationItem.file2.validExtensions" :icon="validationItem?.file2?.icon || icons.upload" :ui="ui.inputFileInGroup">
+          <template #trailing>{{ file2TypeLabel }}</template>
+        </UInput>
+
+        <!-- File 2 as demo file -->
+        <span v-else>
+          <UInput v-model="demoFile2" :ui="ui.inputFileInGroup" :icon="icons.magic"/>
+        </span>
       </UFormField>
 
       <!-- TODO: Fix invisible background and text colors on button components without having to use ui-->
@@ -101,64 +115,144 @@
 
   </UCard>
 
-  <CustomResponseCard :results="results" :validationResults="validationResults"/>
+  <CustomResponseCard :results="results"/>
 
 </template>
 
 <script setup lang="ts">
 
-import type { DropdownMenuItem, SelectItem } from "@nuxt/ui";
-import FileSaver from "file-saver";
+import type { SelectItem } from "@nuxt/ui";
 
-const results: APIResults = reactive({
-  status: "unsent",
-  category: "pending",
-  title: "",
-  message: "",
-  filename: "",
-  time: ""
+// *** Input mode ***
+
+// Allow user to choose between uploading file and using an available demo file
+const inputMode = ref<"upload"|"valid"|"invalid">("upload");
+
+// const inputModeItems = ["upload", "valid", "invalid"];
+const inputModeItems: SelectItem[] = [
+  {
+    value: "upload",
+    icon: icons.upload,
+    label: "Upload"
+  },
+  {
+    type: "separator"
+  },
+  {
+    type: "label",
+    label: "Demo files"
+  },
+  {
+    value: "valid",
+    icon: icons.success,
+    label: "Valid",
+
+  },
+  {
+    value: "invalid",
+    icon: icons.error,
+    label: "Invalid"
+  }
+]
+
+const inputModelSelectedItem = computed(() => {
+  return inputModeItems.find(item => item.value == inputMode.value);
 });
 
-type KindType = "ndr" | "xsd" | "xml" | "cmf" | "xml-catalog" | "message-catalog";
+// Reset state when switching input modes
+watch(inputMode, async (newValue, oldValue) => {
+  await updateFiles();
+});
 
-type StateType = {
-  kind?: KindType | undefined,
-  file1?: File
-  file2?: File,
-  mediaType?: "json" | "csv"
+const demoFile1 = ref();
+const demoFile2 = ref();
+
+
+async function onValidationKindChange() {
+  await updateFiles();
 }
 
-const state: StateType = reactive({
-  kind: undefined,
-  file1: undefined,
-  file2: undefined,
+// *** File change ***
+
+/**
+ * Update the file state since `v-model` doesn't work on file inputs.
+ */
+function onFile1Change(event: Event) {
+  file1Error.value = "";
+  state.file1 = ToolboxForm.fileInput(event);
+  results.request = "unsent";
+}
+
+/**
+ * Update the file state since `v-model` doesn't work on file inputs.
+ */
+function onFile2Change(event: Event) {
+  file2Error.value = "";
+  state.file2 = ToolboxForm.fileInput(event);
+  results.request = "unsent";
+}
+
+async function updateFiles() {
+  results.request = "unsent";
+  if (inputMode.value == "valid") {
+    state.file1 = await ToolboxForm.loadPublicFile(validationItem.value?.file1?.pathValidExample);
+
+    if (validationItem.value?.file2) {
+      state.file2 = await ToolboxForm.loadPublicFile(validationItem.value?.file2.pathValidExample);
+    }
+  }
+  else if (inputMode.value == "invalid") {
+    state.file1 = await ToolboxForm.loadPublicFile(validationItem.value?.file1?.pathInvalidExample);
+
+    if (validationItem.value?.file2) {
+      state.file2 = await ToolboxForm.loadPublicFile(validationItem.value?.file2.pathInvalidExample);
+    }
+  }
+
+  if (inputMode.value != "upload") {
+    demoFile1.value = state.file1?.name;
+    demoFile2.value = state.file2?.name;
+  }
+}
+
+
+// *** State ***
+
+type ValidateStateType = {
+  kind: ValidationKindType,
+  file1: File
+  file2?: File,
+  mediaType: "json" | "csv"
+}
+
+const state = reactive<Partial<ValidateStateType>>({
   mediaType: "json"
 });
 
-type ValidationKindType = SelectItem & {
-  value?: KindType | undefined,
+type ValidationKindType = "ndr" | "xsd" | "xml" | "cmf" | "xml-catalog" | "message-catalog";
+
+type InputFileType = {
+  description: string,
+  icon: string,
+  paramName: string,
+  file?: File,
+  validExtensions: string[],
+  pathValidExample: string,
+  pathInvalidExample: string
+}
+
+type ValidationItemType = SelectItem & {
+  value?: ValidationKindType,
   description?: string,
   note?: string,
   group: "display" | "XSD" | "XML",
   extensions?: string[],
   route?: string,
-  file1?: {
-    description: string,
-    fileType: string,
-    icon: string,
-    paramName: string,
-    file: File | undefined
-  },
-  file2?: {
-    description: string,
-    fileType: string,
-    icon: string,
-    paramName: string,
-    file: File | undefined
-  }
+  file1?: InputFileType,
+  file2?: InputFileType
 }
 
-const validationMenuItems: ValidationKindType[] = [
+const validationMenuItems: ValidationItemType[] = [
   {
     label: "XML schemas",
     type: "label",
@@ -174,11 +268,12 @@ const validationMenuItems: ValidationKindType[] = [
     group: "XSD",
     route: API.routes.validate_ndr,
     file1: {
-      fileType: "XSD | ZIP",
       icon: icons.xml,
       description: "NIEM XSD",
       paramName: "file",
-      file: undefined
+      validExtensions: [".xsd", ".zip"],
+      pathValidExample: "demo/validate/ndr/CrashDriver-6.0.zip",
+      pathInvalidExample : "demo/validate/ndr/Crash Driver IEPD-invalid.zip"
     }
   },
   {
@@ -191,11 +286,12 @@ const validationMenuItems: ValidationKindType[] = [
     group: "XSD",
     route: API.routes.validate_xsd,
     file1: {
-      fileType: "XSD | ZIP",
       icon: icons.xml,
       description: "NIEM XSD",
       paramName: "file",
-      file: undefined
+      validExtensions: [".xsd", ".zip"],
+      pathValidExample: "demo/validate/xml/single/person.xsd",
+      pathInvalidExample : "demo/validate/xml/single/person-invalid.xsd"
     }
   },
   {
@@ -208,24 +304,25 @@ const validationMenuItems: ValidationKindType[] = [
     group: "display"
   },
   // TODO: Fix validate CMF call
-  // {
-  //   value: "cmf",
-  //   label: "Validate CMF",
-  //   type: "item",
-  //   description: "Validate a CMF file (an XML instance file) against its NIEM CMF XML schema.",
-  //   note: "Note that this does not check NDR conformance of the content.",
-  //   extensions: ["xml", "cmf"],
-  //   icon: icons.xml,
-  //   group: "XML",
-  //   route: api.validate_cmf,
-  //   file1: {
-  //     fileType: "CMF | XML",
-  //     icon: icons.xml,
-  //     description: "CMF",
-  //     paramName: "file",
-  //     file: undefined
-  //   }
-  // },
+  {
+    value: "cmf",
+    label: "Validate CMF",
+    type: "item",
+    description: "Validate a CMF file (an XML instance file) against its NIEM CMF XML schema.",
+    note: "Note that this does not check NDR conformance of the content.",
+    extensions: ["xml", "cmf"],
+    icon: icons.xml,
+    group: "XML",
+    route: API.routes.validate_cmf,
+    file1: {
+      icon: icons.xml,
+      description: "CMF",
+      paramName: "file",
+      validExtensions: [".cmf", ".xml"],
+      pathValidExample: "demo/validate/xml/cmf/CrashDriver.cmf.xml",
+      pathInvalidExample : "demo/validate/xml/cmf/CrashDriver-invalid.cmf.xml"
+    }
+  },
   {
     value: "xml",
     label: "Validate XML",
@@ -236,19 +333,21 @@ const validationMenuItems: ValidationKindType[] = [
     group: "XML",
     route: API.routes.validate_xml,
     file1: {
-      fileType: "CMF | XML",
       icon: icons.xml,
       description: "XML instance",
       paramName: "xml",
-      file: undefined
+      validExtensions: [".xml"],
+      pathValidExample: "demo/validate/xml/single/person.xml",
+      pathInvalidExample : "demo/validate/xml/single/person-invalid.xml"
 
     },
     file2: {
-      fileType: "ZIP",
       icon: icons.zip,
       description: "NIEM XSD",
       paramName: "xsd",
-      file: undefined
+      validExtensions: [".xsd", ".zip"],
+      pathValidExample: "demo/validate/xml/single/person.xsd",
+      pathInvalidExample: "demo/validate/xml/single/person.xsd"
     }
   },
   {
@@ -261,11 +360,12 @@ const validationMenuItems: ValidationKindType[] = [
     group: "XML",
     route: API.routes.validate_message_catalog,
     file1: {
-      fileType: "XML",
       icon: icons.xml,
       description: "message-catalog.xml or iepd-catalog.xml",
       paramName: "file",
-      file: undefined
+      validExtensions: [".xml"],
+      pathValidExample: "demo/validate/xml/message-catalog/valid-5.0/iepd-catalog.xml",
+      pathInvalidExample : "demo/validate/xml/message-catalog/invalid-5.0/iepd-catalog.xml"
     }
   },
   {
@@ -278,11 +378,12 @@ const validationMenuItems: ValidationKindType[] = [
     group: "XML",
     route: API.routes.validate_xml_catalog,
     file1: {
-      fileType: "XML",
       icon: icons.xml,
       description: "xml-catalog.xml",
       paramName: "file",
-      file: undefined
+      validExtensions: [".xml"],
+      pathValidExample: "demo/validate/xml/xml-catalog/xml-catalog-valid.xml",
+      pathInvalidExample : "demo/validate/xml/xml-catalog/xml-catalog-invalid.xml"
     }
   }
 ]
@@ -294,277 +395,123 @@ const groupedValidationItems = reactive({
   XML: validationItems.filter(item => item.group == "XML")
 });
 
-const selectedKind = computed(() => {
+const validationItem = computed(() => {
   return validationItems.find(item => item.value == state.kind);
 })
 
+const file1TypeLabel = computed(() => fileTypeLabelHelper(validationItem.value?.file1));
+const file2TypeLabel = computed(() => fileTypeLabelHelper(validationItem.value?.file2));
+
+function fileTypeLabelHelper(file: InputFileType | undefined) {
+  if (!file) return "";
+  let extensions = file.validExtensions;
+  let text = extensions.join(" | ").replaceAll(".", "").toUpperCase();
+  return `(${text})`
+}
+
 const mediaTypeItems = API.reportMediaTypes;
 
-// TODO: Extract to a reusable result icon function
 const mediaTypeIcon = computed(() => {
-  if (state.mediaType != undefined) {
-    return mediaTypeItems.find(item => item.value == state.mediaType)?.icon;
-  }
+  return API.mediaTypeIcon(state.mediaType);
 })
 
-const mediaType = computed(() => API.mediaTypeQueryString(state.mediaType));
-
-const validationResults = reactive<ValidationResults>({
-  tests: [],
-  comment: "",
-  errors: -1,
-  info: -1,
-  passed: -1,
-  warnings: -1
+const mediaTypeQueryString = computed(() => {
+  return API.mediaTypeQueryString(state.mediaType)
 });
 
-const demoItems : DropdownMenuItem[] = [
-  {
-    label: "Valid example",
-    icon: icons.success,
-    onSelect: useDemoValidFile
-  },
-  {
-    label: "Invalid example",
-    icon: icons.error,
-    onSelect: useDemoInvalidFile
-  }
-]
-
-async function useDemoValidFile() {
-  useDemoFile(true);
+function fileHelp(fileDescription: string | undefined) {
+  return `${ToolboxForm.UPLOAD_WARNING} | ${fileDescription || "(pending)"}`;
 }
 
-async function useDemoInvalidFile() {
-  useDemoFile(false);
-}
+const extension1 = computed(() => {
+  return ToolboxApp.extension(validationItem.value?.file1?.file?.name);
+})
 
-async function useDemoFile(valid: boolean) {
-  let fileName;
-  switch (selectedKind.value?.value) {
+const extension2 = computed(() => {
+  return ToolboxApp.extension(validationItem.value?.file2?.file?.name);
+})
 
-    case "ndr":
-      fileName = valid ? "CrashDriver-6.0.zip" : "Crash Driver IEPD-invalid.zip";
-      return useDemoFileHandler("ndr/" + fileName, "file1");
 
-    case "xsd":
-      fileName = valid ? "person.xsd" : "person-invalid.xsd";
-      return useDemoFileHandler("xml/single/" + fileName, "file1");
 
-    case "xml":
-      // File 1
-      fileName = valid ? "person.xml" : "person-invalid.xml";
-      useDemoFileHandler("xml/single/" + fileName, "file1");
-
-      // File 2
-      return useDemoFileHandler("xml/single/person.xsd", "file2");
-
-    case "cmf":
-      fileName = valid ? "CrashDriver.cmf.xml" : "CrashDriver-invalid.cmf.xml";
-      return useDemoFileHandler("xml/cmf/" + fileName, "file1");
-
-    case "message-catalog":
-      fileName = valid ? "valid-5.0/iepd-catalog.xml" : "invalid-5.0/iepd-catalog.xml";
-      return useDemoFileHandler("xml/message-catalog/" + fileName, "file1");
-
-    case "xml-catalog":
-      fileName = valid ? "xml-catalog-valid.xml" : "xml-catalog-invalid.xml";
-      return useDemoFileHandler("xml/xml-catalog/" + fileName, "file1");
-  }
-}
-
-async function useDemoFileHandler(path: string, stateFileID: "file1" | "file2") {
-  const response = await fetch("demo/validate/" + path);
-  const blob = await response.blob();
-  const filename = path.split("/").pop() || "input.text";
-  const file = new File([blob], filename);
-
-  const container = new DataTransfer();
-  container.items.add(file);
-
-  // Add the downloaded file to the form and state.
-  const inputFile = document.getElementById(stateFileID) as HTMLInputElement;
-  inputFile.files = container.files;
-  state[stateFileID] = file;
-}
-
-function getFileHelp(fileDescription?: string) {
-  return `${fileDescription || "(pending)"} | ${FILE_UPLOAD_WARNING}`;
-}
+// *** Developer information panel ***
 
 // Compute the second file parameter if applicable
-const codeFileParam2 = computed(() => selectedKind.value?.file2 != undefined ? `-F ${selectedKind.value?.file2?.paramName}=@${ state.file2?.name }` : "");
+const codeFileParam2 = computed(() => validationItem.value?.file2 != undefined ? `-F ${validationItem.value?.file2?.paramName}=@${ state.file2?.name }` : "");
 
 // Compute the curl statement for the developer information panel
-const code = computed(() => `curl -i -X POST -H "Content-Type: multipart/form-data" -F ${selectedKind.value?.file1?.paramName}=@${ state.file1?.name } ${codeFileParam2.value} ${ selectedKind.value?.route}${mediaType.value}`);
+const code = computed(() => `curl -i -X POST -H "Content-Type: multipart/form-data" -F ${validationItem.value?.file1?.paramName}=@${ state.file1?.name } ${codeFileParam2.value} ${ validationItem.value?.route}${mediaTypeQueryString.value}`);
 
 
-// TODO: Validate file extensions
+// *** Form validation ***
+
+const form = useTemplateRef("form");
+
 const file1Error = ref("");
 const file2Error = ref("");
 
-/**
- * TODO: Check file extensions against kind of validation
- */
-function validate(state: StateType) {
-  const errors = initFormErrors();
+let validationFinalPass = false;
 
-  validateRequiredFormField(errors, "kind", state.kind);
-  validateRequiredFormField(errors, "resultFormat", state.mediaType);
-  validateRequiredFormField(errors, "file1", state.file1);
+function validate(state: Partial<ValidateStateType>) {
 
-  if (selectedKind.value?.value == "xml") {
-    validateRequiredFormField(errors, "file2", state.file2);
+  const errors = ToolboxForm.initFormErrors();
+
+  // Check required fields
+  ToolboxForm.validateRequiredField(errors, "kind", state.kind);
+  ToolboxForm.validateRequiredField(errors, "resultFormat", state.mediaType);
+
+  // Check that the file(s) have been uploaded or selected and have a valid extension
+  if (validationFinalPass) {
+    ToolboxForm.validateRequiredField(errors, "file1", state.file1);
+    ToolboxForm.validateFileExtension(errors, "file1", validationItem.value?.file1?.validExtensions || [], extension1.value);
+
+    if (validationItem.value?.file2) {
+      ToolboxForm.validateRequiredField(errors, "file2", state.file2);
+      ToolboxForm.validateFileExtension(errors, "file2", validationItem.value?.file2?.validExtensions || [], extension2.value);
+    }
   }
 
   return errors;
 }
 
-/**
- * Handle updates to the file input.
- *
- * 1. Update the file state since `v-model` doesn't work on file inputs.
- * 2. Set the `to` value based on the file input extension.
- */
-function onFile1Change(event: Event) {
 
-  // Reset any existing file error message
-  file1Error.value = "";
+// *** Submit ***
 
-  const target = event.target as HTMLInputElement;
-  const files = target.files;
-
-  if (!files || files.length == 0) {
-    return;
-  }
-
-  state.file1 = files[0];
-
-  // TODO: Check file input extensions
-
-}
-
-function onFile2Change(event: Event) {
-
-  // Reset any existing file error message
-  file2Error.value = "";
-
-  const target = event.target as HTMLInputElement;
-  const files = target.files;
-
-  if (!files || files.length == 0) {
-    return;
-  }
-
-  state.file2 = files[0];
-
-  // TODO: Check file input extensions
-
-}
+const results = API.initResults();
 
 async function onSubmit() {
 
-  if (!state.kind || !selectedKind.value?.route) {
-    console.warn("Cancelled request for missing fields")
+  // Include files in final round of validation check
+  validationFinalPass = true;
+  let validateResults = await form.value?.validate();
+  if (validateResults == false
+        || !validationItem.value?.file1
+        || !validationItem.value.route
+        || !state.file1
+  ) {
     return;
   }
 
-  if (!state.file1) {
-    console.warn("Cancelled request for missing first file")
-    return;
+  // Add first file
+  let customState: {[key: string]: any} = {};
+  customState[validationItem.value.file1?.paramName] = state.file1;
+
+  // Add optional second file
+  if (validationItem.value.file2) {
+    customState[validationItem.value.file2.paramName] = state.file2;
   }
 
-  const formData = new FormData();
+  // Set the filename for the download results, with qualifier to distinguish kinds of validation.
+  let baseName = state.file1.name.split(".")[0].replaceAll(" ", "-");
+  let qualifier = validationItem.value.value == "message-catalog" || validationItem.value.value == "xml-catalog" ? "" : validationItem.value.value + "-";
+  results.filename = `${baseName}-${qualifier}validation-report.${state.mediaType}`;
 
-  // Build form body manually to adjust for file parameter names
-  if (selectedKind.value.value == "xml") {
-    if (!state.file2) {
-      console.log("Cancelled request for missing second file")
-      return;
-    }
-    formData.append("xml", state.file1);
-    formData.append("xsd", state.file2);
-  }
-  else {
-    formData.append("file", state.file1);
-  }
+  // Make the validation request from the NIEM API and download the results
+  const response = await API.post(validationItem.value.route, customState, results);
+  await API.downloadReportResults(state.mediaType as APIMediaType, response, results);
 
-  console.log("Sending validation request", state.kind, state.file1, state.file2);
-  let start = Date.now();
+  // Reset validation checks
+  validationFinalPass = false;
 
-  const response = await fetch(selectedKind.value.route + mediaType.value, {
-    body: formData,
-    method: "post"
-  });
-
-  results.time = elapsedSeconds(start);
-
-  if (response.ok) {
-    // Download results
-    let blob : Blob;
-
-    // File name = {file1 base name}-validation-{validation type}
-    results.filename = `${state.file1.name.split(".").slice(0, 1)}-validation-${selectedKind.value.value}`;
-
-    if (state.mediaType == "json") {
-      results.filename += ".json";
-      const json : ValidationResults = await response.json();
-      const text = JSON.stringify(json, null, 2);
-      blob = new Blob([text], {type: "application/json"});
-
-      validationResults.tests = json.tests;
-      validationResults.comment = json.comment;
-      validationResults.errors = json.errors;
-      validationResults.info = json.info;
-      validationResults.passed = json.passed;
-      validationResults.warnings = json.warnings;
-    }
-    else if (state.mediaType == "csv") {
-      results.filename += ".csv";
-      const text = await response.text();
-      blob = new Blob([text], {type: "text/csv"});
-    }
-    else {
-      console.warn("Media type not supported.  Could not save file.");
-      return;
-    }
-
-    FileSaver.saveAs(blob, results.filename);
-
-    results.category = state.mediaType == "json" ? getSummaryColorClass() : "info";
-    results.title = "";
-    results.error = undefined;
-    results.message = `Downloaded ${results.filename}.`;
-    console.log("Request succeeded", results.filename);
-  }
-  else {
-    results.category = "error";
-    results.error = await response.json();
-    results.title = `ERROR ${results.error?.status}: ${results.error?.error}`;
-    results.message = results.error?.message.replaceAll(";", "\n\n") || "";
-    console.log("Request failed");
-
-  }
-
-  results.status = "returned";
-
-}
-
-// TODO: Refactor
-function getResultColorClass(severity: ValidationSeverityType | ValidationStatusType) {
-  switch (severity) {
-    case "error" : return "error";
-    case "info": return "info";
-    case "warning": return "warning";
-    case 'passed': return "success";
-  }
-}
-
-// TODO: Refactor
-function getSummaryColorClass() {
-  if (validationResults.errors) return "error";
-  if (validationResults.warnings) return "warning";
-  return "success";
 }
 
 </script>

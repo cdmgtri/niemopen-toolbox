@@ -23,21 +23,36 @@
     </template>
   </PageHeader>
 
-  <!-- TODO: Support migration of other models -->
-
   <UCard>
 
-    <UForm :state="state" :validate="validate" @submit.prevent="onSubmit" enctype="multipart/form-data">
+    <UForm ref="form"
+      :state="state"
+      :validate="validate" :validate-on="['change']"
+      @submit.prevent="onSubmit" enctype="multipart/form-data"
+    >
 
       <!-- Input file -->
       <UFormField
         name="file" required :error="fileError"
         label="1. Select a CMF file to migrate (NIEM subsets only)"
-        help="Do not upload sensitive or distribution-restricted files."
+        :help="ToolboxForm.UPLOAD_WARNING"
       >
-        <CustomFileInput @change="onFileChange" class="w-[600px]">
-          <template #trailing>(CMF)</template>
-        </CustomFileInput>
+
+        <!-- Upload file input -->
+        <span v-if="inputMode=='upload'">
+          <UInput type="file" id="uploadFileElement" @change="onFileChange" accept=".cmf,.cmf.xml,.xml" :icon="icons.upload" :ui="ui.inputFileInGroup">
+            <template #trailing>(CMF)</template>
+          </UInput>
+        </span>
+
+        <!-- Demo file input -->
+        <span v-else>
+          <USelect v-model="demoFileKey" :items="demoFileItems" :ui="ui.inputFileInGroup" :icon="demoFileItem?.icon || icons.magic" placeholder="Choose demo file"/>
+        </span>
+
+        <!-- Select upload file or demo file option -->
+        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode"/>
+
       </UFormField>
 
       <!-- Select from -->
@@ -62,40 +77,79 @@
 
 <script setup lang="ts">
 
-import FileSaver from "file-saver";
+// LATER: Support all models available through the API
 
-const results: APIResults = reactive({
-  status: "unsent",
-  category: "unsent",
-  title: "",
-  message: "",
-  filename: "",
-  time: ""
+
+// *** Input mode ***
+
+// Allow user to choose between uploading a file and using an available demo file
+const inputMode = ref<"upload"|"demo">("upload");
+const inputModeItems = ["upload", "demo"];
+
+watch(inputMode, (value, oldValue) => {
+  state.from = undefined;
+  demoFileKey.value = undefined;
 });
 
-type StateType = {
-  from?: string,
-  to?: string,
-  file?: File
+// *** Demo file support
+
+const demoFileKey = ref();
+
+const demoFileItems: DemoFileItemType[] = [
+  {
+    // TODO: Update valid example filename
+    value: "valid",
+    label: "CrashDriver-NIEM-5.0.cmf.xml",
+    icon: icons.success,
+    path: "demo/migrate/CrashDriver-NIEM-5.0.cmf.xml"
+  },
+  {
+    // TODO: Update invalid example file to a NIEM 5.0 file
+    value: "invalid",
+    label: "CrashDriver-0.6.cmf.xml",
+    icon: icons.error,
+    path: "demo/migrate/CrashDriver-0.6.cmf.xml"
+  }
+]
+
+const demoFileItem = computed(() => {
+  return demoFileItems.find(item => item.value == demoFileKey.value)
+});
+
+watch(demoFileKey, async(newKey, oldKey) => {
+  // Download demo file and update the state
+  if (demoFileItem.value && demoFileItem.value.path && inputMode.value == "demo") {
+    state.file = await ToolboxForm.loadPublicFile(demoFileItem.value.path)
+    state.from = "5.0";
+  }
+  else {
+    state.file = undefined;
+    state.from = undefined;
+  }
+});
+
+
+// *** State ***
+
+type MigrateStateType = {
+  from: string,
+  to: string,
+  file: File
 }
 
-const state: StateType = reactive({
-  from: undefined,
-  to: undefined,
-  file: undefined
-});
+const state = reactive<Partial<MigrateStateType>>({});
 
-
+// LATER: Get all version numbers from API
 const allItems = ["1.0", "2.0", "2.1", "3.0", "3.1", "3.2", "4.0", "4.1", "4.2", "5.0", "5.1", "5.2"];
 
+// Include all but the most recent version as the starting point for the migration
 const fromItems = ref(allItems.slice(0, -1));
 
+// Include all but the first version by default, or filter based on the selected from value
 const toItems = computed(() => {
   if (state.from != undefined) {
-    // Extra declaration to avoid TS error in array filter lambda function
-    let from = state.from;
     // Return more recent versions than the one selected
-    return allItems.slice(1).filter(version => version > from || "");
+    return allItems.slice(1).filter(version => version > (state.from || ""));
   }
   else {
     // Return all but the first version by default
@@ -103,92 +157,71 @@ const toItems = computed(() => {
   }
 });
 
+
+// *** File change ***
+
+/**
+ * Update the file state since `v-model` doesn't work on file inputs.
+ */
+function onFileChange(event: Event) {
+  fileError.value = "";
+  state.file = ToolboxForm.fileInput(event);
+  results.request = "unsent";
+}
+
+
+
+// *** Developer information panel **
+
 const code = computed(() => `curl -i -X POST -H "Content-Type: multipart/form-data" -F from=${ state.from } -F to=${ state.to } -F file=@${ state.file?.name } ${ API.routes.migrate }`);
 
 
-const fileError = ref("");
+// *** Form validation ***
 
-function validate(state: StateType) {
-  const errors = initFormErrors();
+const form = useTemplateRef("form");
 
-  validateRequiredFormField(errors, "file", state.file);
-  validateRequiredFormField(errors, "from", state.from);
-  validateRequiredFormField(errors, "to", state.to);
+const fileError = ref<string | undefined>("");
+
+const extension = computed(() => {
+  return ToolboxApp.extension(state.file?.name);
+});
+
+let validationFinalPass = false;
+
+function validate(state: Partial<MigrateStateType>) {
+  const errors = ToolboxForm.initFormErrors();
+  fileError.value = undefined;
+
+  // Check that from and to fields have been selected
+  ToolboxForm.validateRequiredField(errors, "from", state.from);
+  ToolboxForm.validateRequiredField(errors, "to", state.to);
+
+  // Check that a file has been uploaded or selected and has a valid extension
+  if (validationFinalPass){
+    ToolboxForm.validateRequiredField(errors, "file", state.file);
+    ToolboxForm.validateFileExtension(errors, "file", ["cmf", "xml", "cmf.xml"], extension.value);
+  }
 
   return errors;
 }
 
-/**
- * Handle updates to the file input.
- *
- * 1. Update the file state since `v-model` doesn't work on file inputs.
- * 2. Set the `to` value based on the file input extension.
- */
-function onFileChange(event: Event) {
 
-  // Reset any existing file error message
-  fileError.value = "";
+// *** Submit ***
 
-  const target = event.target as HTMLInputElement;
-  const files = target.files;
-
-  if (!files || files.length == 0) {
-    return;
-  }
-
-  state.file = files[0];
-  const extension = state.file.name?.split(".")?.pop();
-
-  switch (extension) {
-    case "cmf":
-    case "xml":
-      // Valid extension
-      break;
-
-    default:
-      fileError.value = "Please select a valid CMF file (.cmf or .cmf.xml)"
-      break;
-  }
-
-}
+const results = API.initResults();
 
 async function onSubmit() {
   console.log("Sending migration request", state.from, state.to, state.file);
-  let start = Date.now();
 
-  const response = await fetch(API.routes.migrate, {
-    body: getFormBody(state),
-    method: "post"
-  });
+  validationFinalPass = true;
+  let validateResults = await form.value?.validate();
+  if (validateResults == false) return;
 
-  results.time = elapsedSeconds(start);
+  const response = await API.post(API.routes.migrate, state, results);
+  await API.downloadFileResults(response, results);
 
-
-  if (response.ok) {
-    const data = await response.blob();
-
-    // TODO: Calculate default file response extension based on `to` value
-    const header = response.headers.get("Content-Disposition");
-    results.filename = header?.split("=")[1] || "migration-results.zip";
-    FileSaver.saveAs(data, results.filename);
-
-    results.category = "success";
-    results.error = undefined;
-    results.title = "";
-    results.message = `Downloaded ${results.filename}`;
-    console.log("Request succeeded", results.filename);
-  }
-  else {
-    results.category = "error";
-    results.error = await response.json();
-    results.title = `ERROR ${results.error?.status}: ${results.error?.error}`;
-    results.message = results.error?.message.replaceAll(";", "\n\n") || "";
-    console.log("Request failed");
-
-  }
-
-  results.status = "returned";
-
+  // Reset validation checks
+  validationFinalPass = false;
 }
 
 </script>

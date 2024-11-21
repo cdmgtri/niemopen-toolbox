@@ -1,14 +1,14 @@
 
 <template>
-  <UCard v-if="results.status != 'unsent'" :class="cardClasses" :ui="ui">
+  <UCard v-if="results.request != 'unsent'" :class="cardClasses" :ui="ui">
     <template #header>
       <div class="flex justify-between">
-        <CustomIconTitle :title="results.title || results.category.toUpperCase()" :icon="icon"/>
+        <CustomIconTitle :title="results.title || results.status.toUpperCase()" :icon="icon"/>
         <UButton :icon="icons.close" @click="display='hidden'" :class="closeClasses"/>
       </div>
     </template>
 
-    <template #default v-if="!validationResults">
+    <template #default v-if="!results.report">
       <span class="whitespace-pre-line">
         <div>{{ results.message }}</div>
       </span>
@@ -17,13 +17,14 @@
     <template #default v-else>
       <div class="spaced">
         <p>{{ results.message }}</p>
-        <UCard v-if="results.category != 'info'">
+        <UCard v-if="results.status != 'info'">
           <UTable :data="resultCountData" class="flex-1"/>
         </UCard>
 
+        <!-- TODO: Clean up -->
         <!-- <UCard v-for="test in validationResults?.tests"> -->
         <!-- <UCard v-for="test in validationResults?.tests" :ui="{header: 'bg-[var(--ui-success)]/10'}"> -->
-        <UCard v-for="test in validationResults?.tests" :ui="testUI(test.status)">
+        <UCard v-for="test in results.report?.tests" :ui="testUI(test.status)">
           <template #header>
             <UBadge class="mr-2" variant="subtle" :color="getResultColorClass(test.status)">{{ test.status }}</UBadge>
             <span class="mr-1 font-semibold">{{ test.id }} test results</span>
@@ -32,14 +33,14 @@
 
           <UTable :data="test.results" :columns="resultColumns">
             <template #expanded="{ row }">
-              <p>{{ row.original.message }}</p>
+              <p class="text-wrap">{{ row.original.message }}</p>
             </template>
           </UTable>
         </UCard>
       </div>
     </template>
 
-    <template #footer v-if="results.status == 'returned'">
+    <template #footer v-if="results.request == 'returned'">
       <p>Request returned in {{ results.time }} seconds</p>
     </template>
   </UCard>
@@ -55,15 +56,12 @@ import type { AccordionItem, TableColumn, TableData } from '@nuxt/ui';
 
 const display = ref("");
 
-const props = defineProps<{
-  results: APIResults,
-  validationResults?: ValidationResults
-}>();
+const { results } = defineProps<{ results: APITypes.Results }>();
 
-const icon = computed(() => icons[props.results.category]);
+const icon = computed(() => icons[results.status]);
 
 const color = computed(() => {
-  return props.results.category == 'pending' ? "warning" : props.results.category;
+  return results.status == 'pending' ? "warning" : results.status;
 });
 
 // TODO: Test hardcoded margin re custom state pseudo class warning
@@ -84,7 +82,8 @@ const ui = computed(() => {
 });
 
 
-function testUI(status: ValidationStatusType) {
+// TODO: Fix testUI
+function testUI(status: APITypes.ResultStatusCode) {
   return {};
   let color = getResultColorClass(status);
   return {
@@ -95,36 +94,30 @@ function testUI(status: ValidationStatusType) {
 
 
 const resultCountData = computed<TableData[]>(() => {
-  if (!props.validationResults) return [];
+  if (!results.report) return [];
   return [
     {
-      summary: "Passed",
-      count: props.validationResults.passed
-    },
-    {
       summary: "Info",
-      count: props.validationResults.info
+      count: results.report.info
     },
     {
       summary: "Warnings",
-      count: props.validationResults.warnings
+      count: results.report.warnings
     },
     {
       summary: "Errors",
-      count: props.validationResults.errors
+      count: results.report.errors
     },
   ]
 });
 
-console.log(props.validationResults);
-
 type TestItem = AccordionItem & {
-  results: ValidationTestResult[]
+  results: APITypes.TestResult[]
 }
 
 const testItems : ComputedRef<TestItem[]> = computed(() => {
-  if (props.validationResults == undefined) return [];
-  return props.validationResults.tests.map(item => {
+  if (results.report == undefined) return [];
+  return results.report.tests.map(item => {
     return {
       icon: getResultIcon(item.severity),
       label: item.id,
@@ -133,7 +126,7 @@ const testItems : ComputedRef<TestItem[]> = computed(() => {
   });
 });
 
-function getResultIcon(severity: ValidationSeverityType | ValidationStatusType) {
+function getResultIcon(severity: APITypes.ResultSeverityCode | APITypes.ResultStatusCode) {
   switch (severity) {
     case "error" : return icons.error;
     case "info": return icons.info;
@@ -142,7 +135,7 @@ function getResultIcon(severity: ValidationSeverityType | ValidationStatusType) 
   }
 }
 
-function getResultColorClass(severity: ValidationSeverityType | ValidationStatusType) {
+function getResultColorClass(severity: APITypes.ResultSeverityCode | APITypes.ResultStatusCode) {
   switch (severity) {
     case "error" : return "error";
     case "info": return "info";
@@ -151,8 +144,9 @@ function getResultColorClass(severity: ValidationSeverityType | ValidationStatus
   }
 }
 
-const resultColumns: ComputedRef<TableColumn<ValidationTestResult>[]> = computed(() => {
+const resultColumns: ComputedRef<TableColumn<APITypes.TestResult>[]> = computed(() => {
   return [
+    // TODO: Refactor expandable row
     {
       id: 'expand',
       cell: ({ row }) =>

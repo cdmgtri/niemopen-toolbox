@@ -76,6 +76,7 @@ const AppItemsHelper = {
     to: undefined,
     label: "Log in",
     icon: icons.user,
+    class: "cursor-not-allowed opacity-50",
     disabled: true
   },
   preferences: {
@@ -83,6 +84,7 @@ const AppItemsHelper = {
     to: undefined,
     label: "Site preferences",
     icon: icons.preferences,
+    class: "cursor-not-allowed opacity-50",
     disabled: true
   },
   releaseNotes: {
@@ -96,6 +98,7 @@ const AppItemsHelper = {
     to: undefined,
     label: "Help",
     icon: icons.help,
+    class: "cursor-not-allowed opacity-50",
     disabled: true
   },
   niemOpenWebsite: {
@@ -172,32 +175,15 @@ const AppItemsHelper = {
 
 export const AppItems: { [key in AppItemsKeyType]: AppLinkType } = AppItemsHelper
 
-export const AppItemGroups = {
-  tools: [
-    AppItems.browse,
-    AppItems.search,
-    AppItems.build,
-    AppItems.validate,
-    AppItems.transform,
-    AppItems.publish,
-    AppItems.migrate
-  ],
-  siteMenuItems: [
-    AppItems.login,
-    AppItems.preferences,
-    AppItems.releaseNotes,
-    AppItems.help
-  ],
-  footerRightItems: [
-    AppItems.niemOpenWebsite,
-    AppItems.apiRepo,
-    AppItems.cmfRepo,
-    AppItems.cmfToolRepo,
-    AppItems.techHub,
-    AppItems.trainingVideos,
-    AppItems.contact
-  ]
-}
+export const AppTools = [
+  AppItems.browse,
+  AppItems.search,
+  AppItems.build,
+  AppItems.validate,
+  AppItems.transform,
+  AppItems.publish,
+  AppItems.migrate
+];
 
 export function AppMenuItem(label: string | undefined, icon: IconType, childrenLinks: AppLinkType[]): DropdownMenuItem {
   let children = childrenLinks as DropdownMenuItem[];

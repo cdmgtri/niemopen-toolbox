@@ -36,36 +36,45 @@
 
   <UCard>
 
-    <UForm :state="state" :validate="validate" @submit.prevent="onSubmit" enctype="multipart/form-data">
+    <UForm ref="form"
+    :state="state"
+    :validate="validate" :validate-on="['change']"
+    @submit.prevent="onSubmit" enctype="multipart/form-data"
+    >
 
       <!-- Input file -->
       <UFormField
-        name="file" required :error="fileError"
-        label="1. Select a model input file"
-        help="Do not upload sensitive or distribution-restricted files."
+      name="file" required :error="fileError"
+      label="1. Select a model input file"
+      :help="ToolboxForm.UPLOAD_WARNING"
+      :validate-on-input-delay="800"
       >
-        <UButtonGroup>
-          <!-- File input -->
-          <CustomFileInput @change="onFileChange" class="w-[600px]">
-            <template #trailing>(CMF | XSD | ZIP)</template>
-          </CustomFileInput>
 
-          <!-- Demo drop down button -->
-          <UButton color="neutral" variant="subtle" label="Demo"/>
-          <UDropdownMenu :items="demoItems">
-            <UButton color="neutral" variant="subtle" :icon="icons.down"/>
-          </UDropdownMenu>
-        </UButtonGroup>
+        <!-- Upload file input -->
+        <span v-if="inputMode=='upload'">
+          <UInput type="file" @change="onFileChange" :accept="accept" :icon="icons.upload" :ui="ui.inputFileInGroup">
+            <template #trailing>(CMF | XSD | ZIP)</template>
+          </UInput>
+        </span>
+
+        <!-- Demo file input -->
+        <span v-else>
+          <USelect v-model="demoFileKey" :items="demoFileItems" :ui="ui.inputFileInGroup" :icon="demoFileItem?.icon || icons.magic" placeholder="Choose demo file"/>
+        </span>
+
+        <!-- Select upload file or demo file option -->
+        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode"/>
+
       </UFormField>
 
       <!-- Select from -->
       <UFormField name="from" required label="2. Select input file format">
-          <USelect v-model="state.from" :items="fromItems" :icon="fromIcon" class="w-64"/>
+        <USelect v-model="state.from" :items="fromItems" :icon="fromItem?.icon" class="w-64"/>
       </UFormField>
 
       <!-- Select to -->
       <UFormField name="to" required label="3. Select transformation format">
-        <USelect v-model="state.to" :items="toItems" :icon="toIcon" class="w-64"/>
+        <USelect v-model="state.to" :items="toItems" :icon="toItem?.icon" class="w-64"/>
       </UFormField>
 
       <!-- TODO: Fix invisible background and text colors on button components without having to use ui-->
@@ -79,42 +88,115 @@
 </template>
 
 <script setup lang="ts">
+import type { Form } from '@nuxt/ui';
+import type { ShallowRef, ShallowUnwrapRef } from 'vue';
 
-import type { DropdownMenuItem } from "@nuxt/ui";
-import FileSaver from "file-saver";
 
-const results: APIResults = reactive({
-  status: "unsent",
-  category: "unsent",
-  title: "",
-  message: "",
-  filename: "",
-  time: ""
+
+// *** Input mode ***
+
+// Allow user to choose between uploading file and using an available demo file
+const inputMode = ref<"upload"|"demo">("upload");
+const inputModeItems = ["upload", "demo"]
+
+// Reset state when switching input modes
+watch(inputMode, (newValue, oldValue) => {
+  state.file = undefined;
+  state.from = undefined;
+  results.request = "unsent";
 });
 
-type StateType = {
-  from?: "cmf" | "xsd" | undefined,
-  to?: "cmf" | "xsd" | "json_schema" | "owl" | undefined,
-  file?: File
+
+// *** Demo file support ***
+
+// Allow user to pick between available demo file options
+const demoFileKey = ref();
+
+const demoFileItems: DemoFileItemType[] = [
+  {
+    label: "Valid examples",
+    type: "label"
+  },
+  {
+    value: "cmf",
+    label: "CrashDriver.cmf.xml",
+    icon: icons.cmf,
+    from: "cmf",
+    path: "demo/transform/CrashDriver.cmf.xml"
+  },
+  {
+    value: "xsd",
+    label: "CrashDriver.xsd.zip",
+    icon: icons.xml,
+    from: "xsd",
+    path: "demo/transform/CrashDriver.zip"
+  },
+  {
+    type: "separator"
+  },
+  {
+    label: "Invalid examples",
+    type: "label"
+  },
+  {
+    value: "cmf-invalid",
+    label: "CrashDriver-version-0.6.cmf.xml",
+    icon: icons.error,
+    from: "cmf",
+    path: "demo/transform/CrashDriver-0.6.cmf.xml"
+  },
+  {
+    value: "txt-invalid",
+    label: "CrashDriver.txt",
+    icon: icons.error,
+    from: undefined,
+    path: "demo/transform/CrashDriver.txt"
+  }
+]
+
+const demoFileItem = computed(() => {
+  return demoFileItems.find(item => item.value == demoFileKey.value);
+})
+
+// Update state.file when a demo file is selected
+watch(demoFileKey, async (newKey, oldKey) => {
+  if (demoFileItem.value && demoFileItem.value.path) {
+    state.file = await ToolboxForm.loadPublicFile(demoFileItem.value.path)
+  }
+  else {
+    state.file = undefined;
+  }
+  state.from = demoFileItem.value?.from;
+  form.value?.setErrors([]);
+  results.request = "unsent";
+});
+
+
+// *** State ***
+
+type FromType = "cmf" | "xsd";
+type ToType = FromType | "json_schema" | "owl";
+
+type TransformStateType = {
+  from: FromType,
+  to: ToType,
+  file: File
 }
 
-const state: StateType = reactive({
-  from: undefined,
-  to: undefined,
-  file: undefined
-});
-
+const state = reactive<Partial<TransformStateType>>({});
 
 const fromItems = [
   {
     value: "cmf",
     label: "CMF XML",
-    icon: icons.cmf
+    icon: icons.cmf,
+    extensions: ["cmf.xml", "cmf", "xml"]
   },
   {
     value: "xsd",
     label: "NIEM XSD",
-    icon: icons.xml
+    icon: icons.xml,
+    extensions: ["zip", "xsd"]
   }
 ];
 
@@ -123,181 +205,115 @@ const toItems = [
   {
     value: "json_schema",
     label: "JSON Schema",
-    icon: icons.json
+    icon: icons.json,
+    extensions: ["schema.json", "jschema", "json"]
+
   },
   {
     value: "owl",
     label: "OWL",
-    icon: icons.owl
+    icon: icons.owl,
+    extensions: ["ttl"]
   }
 ];
 
-const fromIcon = computed(() => {
-  return fromItems.find(item => item.value == state.from)?.icon;
+const fromItem = computed(() => {
+  return fromItems.find(item => item.value == state.from);
 });
 
-const toIcon = computed(() => {
-  return toItems.find(item => item.value === state.to)?.icon;
+const toItem = computed(() => {
+  return toItems.find(item => item.value === state.to);
 });
 
+const extension = computed(() => {
+  return ToolboxApp.extension(state.file?.name);
+});
+
+const fromExtensions = fromItems.flatMap(item => item.extensions);
+const accept = fromExtensions.map(extension => "." + extension).join(", ");
+
+
+// *** File change ***
+
+/**
+ * Update the file state since `v-model` doesn't work on file inputs.
+ * Set the default state.from value
+ */
+
+async function onFileChange(event: Event) {
+  fileError.value = "";
+  state.file = ToolboxForm.fileInput(event);
+  state.from = defaultFrom();
+  results.request = "unsent"
+  await form.value.validate({name: "", silent: true});
+}
+
+function defaultFrom() {
+  switch (extension.value) {
+    case "cmf":
+    case "xml":
+    case "cmf.xml":
+      return "cmf";
+
+    case "xsd":
+    case "zip":
+      return "xsd";
+
+    default:
+      return undefined;
+  }
+}
+
+
+// *** Developer information panel ***
 
 const code = computed(() => `curl -i -X POST -H "Content-Type: multipart/form-data" -F from=${ state.from } -F to=${ state.to } -F file=@${ state.file?.name } ${ API.routes.transform }`);
 
-const demoItems : DropdownMenuItem[] = [
-  {
-    label: "Crash Driver CMF",
-    icon: icons.cmf,
-    onSelect: useDemoCMFFile
-  },
-  {
-    label: "Crash Driver XSD ZIP",
-    icon: icons.xml,
-    onSelect: useDemoXSDFile
-  },
-  {
-    label: "Invalid Crash Driver CMF",
-    icon: icons.error,
-    onSelect: useDemoCMFInvalidFile
-  },
-]
 
-const fileError = ref("");
+// *** Form validation ***
 
-function validate(state: StateType) {
-  const errors = initFormErrors();
+const form = useTemplateRef("form") as Readonly<ShallowRef<ShallowUnwrapRef<Form<TransformStateType>>>>;
 
-  validateRequiredFormField(errors, "file", state.file);
-  validateRequiredFormField(errors, "from", state.from);
-  validateRequiredFormField(errors, "to", state.to);
+const fileError: Ref<string | undefined> = ref();
+
+let validationFinalPass = false;
+
+function validate(state: Partial<TransformStateType>) {
+
+  const errors = ToolboxForm.initFormErrors();
+  fileError.value = undefined;
+
+  // Skip validation until form submission
+  if (validationFinalPass) {
+    ToolboxForm.validateRequiredField(errors, "from", state.from);
+    ToolboxForm.validateRequiredField(errors, "to", state.to);
+    ToolboxForm.validateRequiredField(errors, "file", state.file);
+
+    ToolboxForm.validateFileExtension(errors, "file", fromExtensions, extension.value);
+  }
 
   return errors;
 }
 
-/**
- * Handle updates to the file input.
- *
- * 1. Update the file state since `v-model` doesn't work on file inputs.
- * 2. Set the `to` value based on the file input extension.
- */
-function onFileChange(event: Event) {
 
-  // Reset any existing file error message
-  fileError.value = "";
+// *** Submit ***
 
-  const target = event.target as HTMLInputElement;
-  const files = target.files;
+const results = API.initResults();
 
-  if (!files || files.length == 0) {
+async function onSubmit() {
+  // Include file in final round of validation check
+  validationFinalPass = true;
+  let validateResults = await form.value?.validate({name: "", silent: true});
+  if (validateResults == false) {
+    validationFinalPass = false;
     return;
   }
 
-  state.file = files[0];
-  const extension = state.file.name?.split(".")?.pop();
+  const response = await API.post(API.routes.transform, state, results);
+  await API.downloadFileResults(response, results);
 
-  switch (extension) {
-    case undefined:
-      return;
-
-    case "cmf":
-    case "xml":
-      state.from = "cmf";
-      break;
-
-    case "xsd":
-    case "zip":
-      state.from = "xsd";
-      break;
-
-    default:
-      state.from = undefined;
-      fileError.value = "Please select a valid file (.xml, .cmf, .xsd, .zip)"
-      break;
-  }
-
-}
-
-let defaultResultsExtension = computed(() => {
-  switch (state.to) {
-    case "cmf": return "cmf.xml";
-    case "xsd": return "zip";
-    case "owl": return "ttl";
-    case "json_schema": return "schema.json";
-  }
-});
-
-async function onSubmit() {
-  // Set up
-  let start = Date.now();
-  results.status = "pending";
-  results.category = "pending";
-  results.message = "Request sent...";
-  console.log("Sending transform request", state.from, state.to, state.file);
-
-  // API request
-  const response = await fetch(API.routes.transform, {
-    body: getFormBody(state),
-    method: "post"
-  });
-
-  results.time = elapsedSeconds(start);
-  console.log(response);
-
-  if (response.ok) {
-    // Download results
-    const data = await response.blob();
-    const header = response.headers.get("Content-Disposition");
-    results.filename = header?.split("=")[1] || "transform-results." + defaultResultsExtension;
-    FileSaver.saveAs(data, results.filename);
-
-    // Success message
-    results.category = "success";
-    results.error = undefined;
-    results.title = "";
-    results.message = `Downloaded ${results.filename}`;
-    console.log("Request succeeded", results.filename);
-  }
-  else {
-    // Error message
-    results.category = "error";
-    results.error = await response.json() || await response.text();
-    results.title = `ERROR ${results.error?.status}: ${results.error?.error}`;
-    results.message = results.error?.message.replaceAll(";", "\n\n") || "";
-    console.error("Request failed");
-  }
-
-  results.status = "returned";
-
-}
-
-async function useDemoCMFFile() {
-  useDemoFile("CrashDriver.cmf.xml", "cmf");
-}
-
-async function useDemoCMFInvalidFile() {
-  useDemoFile("CrashDriver-0.6.cmf.xml", "cmf");
-}
-
-async function useDemoXSDFile() {
-  useDemoFile("CrashDriver.zip", "xsd");
-}
-
-/**
- * Download a file from the public directory to use as form input.
- */
-async function useDemoFile(path: string, from: typeof state.from) {
-  const response = await fetch("demo/transform/" + path);
-  const blob = await response.blob();
-  const filename = path.split("/").pop() || "input.text";
-  const file = new File([blob], filename);
-
-  const container = new DataTransfer();
-  container.items.add(file);
-
-  // Add the downloaded file to the form and state.
-  const inputFile = document.getElementById("file") as HTMLInputElement;
-  inputFile.files = container.files;
-  state.file = file;
-  state.from = from;
+  // Reset validation checks
+  validationFinalPass = false;
 }
 
 </script>

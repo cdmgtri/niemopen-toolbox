@@ -9,6 +9,7 @@ export default {
   journal: "bi:journal-text",
   externalLink: "i-heroicons:arrow-up-right-20-solid",
   standard: "material-symbols:book-2-outline-rounded",
+  magic: "material-symbols:magic-button-outline",
 
   // Pages
   home: "bi:house",
