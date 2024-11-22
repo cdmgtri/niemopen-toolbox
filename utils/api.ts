@@ -36,8 +36,14 @@ export class API {
     let body = ToolboxForm.formBody(state);
     API.updateResultsRequestSent(results);
 
+    // Add media type to route if present in the state object
+    let updatedRoute = route;
+    if (state.mediaType) {
+      updatedRoute += API.mediaTypeQueryString(state.mediaType);
+    }
+
     // Request
-    let response = await fetch(route, {
+    let response = await fetch(updatedRoute, {
       body,
       method: "post"
     });

@@ -498,6 +498,9 @@ async function onSubmit() {
     customState[validationItem.value.file2.paramName] = state.file2;
   }
 
+  // Add the media type
+  customState.mediaType = state.mediaType;
+
   // Set the filename for the download results, with qualifier to distinguish kinds of validation.
   let baseName = state.file1.name.split(".")[0].replaceAll(" ", "-");
   let qualifier = validationItem.value.value == "message-catalog" || validationItem.value.value == "xml-catalog" ? "" : validationItem.value.value + "-";
