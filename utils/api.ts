@@ -35,7 +35,6 @@ export class API {
     // Pre-request: Load body and set start time
     let body = ToolboxForm.formBody(state);
     API.updateResultsRequestSent(results);
-    console.log("Sending transform request", state.from, state.to, state.file);
 
     // Request
     let response = await fetch(route, {
@@ -66,7 +65,6 @@ export class API {
 
     results.time = API.computeTimeInSeconds(results.start as number);
     results.request = "returned";
-    console.log(response);
 
     return response;
 
@@ -115,7 +113,6 @@ export class API {
 
     results.status = API.reportColorClass(results.report);
     results.message = `Downloaded ${results.filename}.`;
-    console.log("Request succeeded", results.filename);
 
     API.downloadFile(blob, results.filename);
 
@@ -172,7 +169,7 @@ export class API {
     }
   }
 
-  // TODO: Rename reportColorClass
+  // TODO: Rename reportColorClass or remove
   /**
    * Returns success, warning, error color classes based on
    * whether or not the report contains errors or warnings.  Informational items are not included.

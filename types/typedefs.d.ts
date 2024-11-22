@@ -17,6 +17,8 @@ declare global {
     path?: string
   }
 
+  type ColorType = "success" | "error" | "warning" | "info" | "neutral";
+
 }
 
 export {}

@@ -115,7 +115,7 @@
 
   </UCard>
 
-  <CustomResponseCard :results="results"/>
+  <CustomResponseCard :results="results" :kind="state.kind"/>
 
 </template>
 
@@ -229,8 +229,6 @@ const state = reactive<Partial<ValidateStateType>>({
   mediaType: "json"
 });
 
-type ValidationKindType = "ndr" | "xsd" | "xml" | "cmf" | "xml-catalog" | "message-catalog";
-
 type InputFileType = {
   description: string,
   icon: string,
@@ -242,7 +240,7 @@ type InputFileType = {
 }
 
 type ValidationItemType = SelectItem & {
-  value?: ValidationKindType,
+  value?: APITypes.ValidationKindType,
   description?: string,
   note?: string,
   group: "display" | "XSD" | "XML",

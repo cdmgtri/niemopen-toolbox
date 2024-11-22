@@ -55,7 +55,10 @@ declare namespace APITypes {
     message: string,
     location: string,
     line: string,
-    column: string
+    column: string,
+    comment: string
   }
+
+  type ValidationKindType = "ndr" | "xsd" | "xml" | "cmf" | "xml-catalog" | "message-catalog";
 
 }
