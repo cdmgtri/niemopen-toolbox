@@ -4,7 +4,7 @@
 
     <div class="flex justify-between z-30">
       <!-- Header icon and title -->
-      <CustomIconTitle :icon="page.icon" :title="page.label" classes="page-header-title font-bold"/>
+      <ToolboxIconTitle :icon="page.icon" :title="page.label" classes="page-header-title font-bold"/>
 
       <!-- Header buttons -->
       <span class="gap-1.5">
@@ -13,7 +13,7 @@
         <!-- LATER: Slot for additional page buttons -->
 
         <UButtonGroup size="sm" id="page-header-buttons">
-          <UTooltip v-for="panel in panels" :text="panel.description">
+          <UTooltip v-for="panel in panels" :text="panel.label">
 
             <UButton
               color="neutral" variant="outline"
@@ -55,7 +55,7 @@ const panels: AppLinkType[] = [
   {
     value: "user",
     label: "User information",
-    icon: icons.user
+    icon: icons.info
   },
   {
     value: "developer",

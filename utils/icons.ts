@@ -61,7 +61,7 @@ export default {
   github: "mdi:github",
   youtube: "mdi:youtube",
   swagger: "simple-icons:swagger",
-  toolbox: "hugeicons:code",
+  toolbox: "fluent:toolbox-32-regular",
   niemopen: "gravity-ui:nodes-down",
 
   // Formats

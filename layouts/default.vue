@@ -1,7 +1,7 @@
 
 <template>
   <header>
-    <PageNavbar/>
+    <SiteHeader/>
   </header>
 
   <main>
@@ -14,7 +14,7 @@
   </main>
 
   <footer>
-    <PageFooter/>
+    <SiteFooter/>
   </footer>
 </template>
 
@@ -27,7 +27,9 @@
   }
 
   header, footer {
+    left: 50%;
     position: fixed;
+    transform: translateX(-50%);
     z-index: 10;
   }
 
@@ -36,8 +38,7 @@
   }
 
   main {
-    margin-top: 48px;
-    margin-bottom: 60px;
+    margin: 48px auto 100px auto;
   }
 
   #page-contents {

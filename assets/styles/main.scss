@@ -15,7 +15,7 @@ a[href] {
   color: #00709A;
 }
 
-a[href]:state(hover) {
+a[href]:hover {
   color: #00709A;
   font-weight: bolder;
 }
@@ -26,7 +26,7 @@ a[href]:state(hover) {
   // color: white !important;
 // }
 
-button:state(hover) {
+button:hover {
   font-weight: bolder;
 }
 
@@ -59,7 +59,10 @@ h3 {
 }
 
 input::file-selector-button {
+  border-right: solid lightgray 1px;
+  font-weight: 300;
   margin-right: 12px;
+  padding-right: 12px;
 }
 
 kbd {
