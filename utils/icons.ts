@@ -50,8 +50,8 @@ export default {
   download: "material-symbols-light:download-rounded",
 
   // Directions and locations
-  start: "material-symbols:not-started-rounded",
-  end: "material-symbols:stop-circle-rounded",
+  start: "material-symbols:line-start-circle-outline-rounded",
+  end: "material-symbols:line-end-circle-outline-rounded",
   down: "material-symbols:keyboard-arrow-down-rounded",
   up: "material-symbols:keyboard-arrow-up-rounded",
   left: "material-symbols:chevron-left-rounded",

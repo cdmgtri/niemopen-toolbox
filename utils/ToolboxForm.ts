@@ -70,7 +70,13 @@ export class ToolboxForm {
     return files[0];
   }
 
-  static readonly UPLOAD_WARNING = "Do not upload sensitive or distribution-restricted files.";
+  static readonly UPLOAD_WARNING = "Do not upload sensitive or distribution-restricted files";
+
+  static readonly DEMO_FILE_MESSAGE = "Demo file selected";
+
+  static fileWarning(isUpload: boolean) {
+    return isUpload ? this.UPLOAD_WARNING : this.DEMO_FILE_MESSAGE;
+  }
 
   /**
    * Downloads a file from the public folder and adds it to the files array

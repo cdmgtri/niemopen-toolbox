@@ -9,8 +9,6 @@ export class ToolboxApp {
   static extension(filename: string | undefined) {
     // Special cases
     if (!filename) return undefined;
-    if (filename.endsWith(".cmf.xml")) return "cmf.xml";
-    if (filename.endsWith(".schema.json")) return "schema.json";
 
     // Default
     return filename?.split(".")?.pop();

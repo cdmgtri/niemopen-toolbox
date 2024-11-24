@@ -46,8 +46,7 @@
       <UFormField
       name="file" required :error="fileError"
       label="1. Select a model input file"
-      :help="ToolboxForm.UPLOAD_WARNING"
-      :validate-on-input-delay="800"
+      :help="ToolboxForm.fileWarning(inputMode == 'upload')"
       >
 
         <!-- Upload file input -->
@@ -59,11 +58,12 @@
 
         <!-- Demo file input -->
         <span v-else>
-          <USelect v-model="demoFileKey" :items="demoFileItems" :ui="ui.inputFileInGroup" :icon="demoFileItem?.icon || icons.magic" placeholder="Choose demo file"/>
+          <UInput v-model="demoFile" :ui="ui.inputFileInGroup" :icon="icons.magic"/>
         </span>
 
         <!-- Select upload file or demo file option -->
-        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode"/>
+        <!-- @vue-expect-error -->
+        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode" :icon="inputModeItem?.icon"/>
 
       </UFormField>
 
@@ -84,49 +84,52 @@
 
   </UCard>
 
-  <CustomResponseCard :results="results"/>
+  <APIResponsePanel :results="results"/>
 </template>
 
 <script setup lang="ts">
-import type { Form } from '@nuxt/ui';
+import type { Form, SelectItem } from '@nuxt/ui';
 import type { ShallowRef, ShallowUnwrapRef } from 'vue';
 
 
 
 // *** Input mode ***
 
+type InputMode = "upload" | "cmf" | "xsd" | "cmf-invalid" | "text";
+
 // Allow user to choose between uploading file and using an available demo file
-const inputMode = ref<"upload"|"demo">("upload");
-const inputModeItems = ["upload", "demo"]
+const inputMode = ref<InputMode>("upload");
 
-// Reset state when switching input modes
-watch(inputMode, (newValue, oldValue) => {
-  state.file = undefined;
-  state.from = undefined;
-  results.request = "unsent";
-});
+type InputModeItem = SelectItem & {
+  value?: InputMode,
+  icon?: IconType,
+  from?: "cmf" | "xsd",
+  path?: string
+}
 
-
-// *** Demo file support ***
-
-// Allow user to pick between available demo file options
-const demoFileKey = ref();
-
-const demoFileItems: DemoFileItemType[] = [
+const inputModeItems: InputModeItem[] = [
+  {
+    value: "upload",
+    label: "Upload",
+    icon: icons.upload
+  },
+  {
+    type: "separator"
+  },
   {
     label: "Valid examples",
     type: "label"
   },
   {
     value: "cmf",
-    label: "CrashDriver-5.0.cmf.xml",
+    label: "CMF",
     icon: icons.cmf,
     from: "cmf",
     path: "demo/transform/CrashDriver-5.0.cmf.xml"
   },
   {
     value: "xsd",
-    label: "CrashDriver-5.0.xsd.zip",
+    label: "XSD",
     icon: icons.xml,
     from: "xsd",
     path: "demo/transform/CrashDriver-5.0.zip"
@@ -140,34 +143,38 @@ const demoFileItems: DemoFileItemType[] = [
   },
   {
     value: "cmf-invalid",
-    label: "CrashDriver-cmf-version-0.6.cmf.xml",
+    label: "CMF 0.6",
     icon: icons.error,
     from: "cmf",
     path: "demo/transform/CrashDriver-5.0-CMFv0.6.cmf.xml"
   },
   {
-    value: "txt-invalid",
-    label: "CrashDriver.txt",
+    value: "text",
+    label: ".txt file",
     icon: icons.error,
     from: undefined,
     path: "demo/transform/CrashDriver-5.0.txt"
   }
 ]
 
-const demoFileItem = computed(() => {
-  return demoFileItems.find(item => item.value == demoFileKey.value);
+const inputModeItem = computed(() => {
+  return inputModeItems.find(item => item.value == inputMode.value);
 })
 
-// Update state.file when a demo file is selected
-watch(demoFileKey, async (newKey, oldKey) => {
-  if (demoFileItem.value && demoFileItem.value.path) {
-    state.file = await ToolboxForm.loadPublicFile(demoFileItem.value.path)
+const demoFile = ref();
+
+// Reset state when switching input modes
+watch(inputMode, async (newValue, oldValue) => {
+  if (inputModeItem.value && inputMode.value != "upload") {
+    state.file = await ToolboxForm.loadPublicFile(inputModeItem.value.path)
+    demoFile.value = state.file?.name;
+    state.from = inputModeItem.value?.from;
   }
   else {
     state.file = undefined;
+    state.from = undefined;
   }
-  state.from = demoFileItem.value?.from;
-  form.value?.setErrors([]);
+  form.value.clear();
   results.request = "unsent";
 });
 
@@ -190,7 +197,7 @@ const fromItems = [
     value: "cmf",
     label: "CMF XML",
     icon: icons.cmf,
-    extensions: ["cmf.xml", "cmf", "xml"]
+    extensions: ["cmf", "xml"]
   },
   {
     value: "xsd",

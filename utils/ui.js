@@ -22,8 +22,7 @@ export default {
    * Input mode select box
    */
   inputMode: {
-    base: `w-[125px] font-medium text-[var(--ui-text)] capitalize visible rounded-s-none focus-visible:ring-[var(--ui-primary)]`,
-    item: 'capitalize'
+    base: `w-[135px] font-medium text-[var(--ui-text)]  visible rounded-s-none focus-visible:ring-[var(--ui-primary)]`
   }
 
 }

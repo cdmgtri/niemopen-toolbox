@@ -56,7 +56,7 @@
       label="1. Select validation kind"
       :help="validationItem?.description"
       >
-      <!-- @vue-expect-error -->
+        <!-- @vue-expect-error -->
         <USelect v-model="state.kind" :items="validationMenuItems" @change="onValidationKindChange" :icon="validationItem?.icon" class="w-64"/>
       </UFormField>
 
@@ -71,10 +71,8 @@
       <!-- 3. Required File 1 -->
       <UFormField name="file1" required label="3. Select a file to validate" :help="fileHelp(validationItem?.file1?.description)">
 
-        <!-- File 1 -->
+        <!-- File 1 as upload -->
         <span v-if="inputMode=='upload'">
-
-          <!-- File 1 as upload -->
           <UInput type="file" @change="onFile1Change" :accept="validationItem?.file1?.validExtensions" :icon="validationItem?.file1?.icon || icons.upload" :ui="ui.inputFileInGroup">
             <template #trailing>{{ file1TypeLabel }}</template>
           </UInput>
@@ -87,7 +85,7 @@
 
         <!-- Select upload file or demo file option -->
         <!-- @vue-expect-error -->
-        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode" :icon="inputModelSelectedItem?.icon"/>
+        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode" :icon="inputModeSelectedItem?.icon"/>
 
       </UFormField>
 
@@ -117,7 +115,7 @@
 
   </UCard>
 
-  <CustomResponseCard :results="results" :kind="state.kind"/>
+  <APIResponsePanel :results="results" :kind="state.kind"/>
 
 </template>
 
@@ -165,7 +163,7 @@ const inputModeItems: InputModeItem[] = [
   }
 ]
 
-const inputModelSelectedItem = computed(() => {
+const inputModeSelectedItem = computed(() => {
   return inputModeItems.find(item => item.value == inputMode.value);
 });
 
@@ -271,7 +269,10 @@ const mediaTypeQueryString = computed(() => {
 });
 
 function fileHelp(fileDescription: string | undefined) {
-  return `${ToolboxForm.UPLOAD_WARNING} | ${fileDescription || "(pending)"}`;
+  if (inputMode.value == "upload") {
+    return `${ToolboxForm.UPLOAD_WARNING} | ${fileDescription || "(pending)"}`;
+  }
+  return ToolboxForm.DEMO_FILE_MESSAGE;
 }
 
 const extension1 = computed(() => {

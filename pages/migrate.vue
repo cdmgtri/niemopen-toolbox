@@ -33,9 +33,9 @@
 
       <!-- Input file -->
       <UFormField
-        name="file" required :error="fileError"
-        label="1. Select a CMF file to migrate (NIEM subsets only)"
-        :help="ToolboxForm.UPLOAD_WARNING"
+      name="file" required :error="fileError"
+      label="1. Select a CMF file to migrate (NIEM subsets only)"
+      :help="ToolboxForm.fileWarning(inputMode == 'upload')"
       >
 
         <!-- Upload file input -->
@@ -47,11 +47,12 @@
 
         <!-- Demo file input -->
         <span v-else>
-          <USelect v-model="demoFileKey" :items="demoFileItems" :ui="ui.inputFileInGroup" :icon="demoFileItem?.icon || icons.magic" placeholder="Choose demo file"/>
+          <UInput v-model="demoFile" :ui="ui.inputFileInGroup" :icon="icons.magic"/>
         </span>
 
         <!-- Select upload file or demo file option -->
-        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode"/>
+        <!-- @vue-expect-error -->
+        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode" :icon="inputModeItem?.icon"/>
 
       </UFormField>
 
@@ -72,52 +73,67 @@
 
   </UCard>
 
-  <CustomResponseCard :results="results"/>
+  <APIResponsePanel :results="results"/>
 </template>
 
 <script setup lang="ts">
+import type { SelectItem } from '@nuxt/ui';
+
 
 // LATER: Support all models available through the API
 
 
 // *** Input mode ***
 
+type InputMode = "upload" | "valid" | "invalid";
+
 // Allow user to choose between uploading a file and using an available demo file
-const inputMode = ref<"upload"|"demo">("upload");
-const inputModeItems = ["upload", "demo"];
+const inputMode = ref<InputMode>("upload");
 
-watch(inputMode, (value, oldValue) => {
-  state.from = undefined;
-  demoFileKey.value = undefined;
-});
+type InputModeItem = SelectItem & {
+  value?: InputMode,
+  icon?: IconType,
+  path?: string
+}
 
-// *** Demo file support
-
-const demoFileKey = ref();
-
-const demoFileItems: DemoFileItemType[] = [
+const inputModeItems: InputModeItem[] = [
+  {
+    value: "upload",
+    icon: icons.upload,
+    label: "Upload"
+  },
+  {
+    type: "separator"
+  },
+  {
+    type: "label",
+    label: "Demo files"
+  },
   {
     value: "valid",
-    label: "Valid",
     icon: icons.success,
+    label: "Valid",
     path: "demo/migrate/CrashDriver-NIEM-5.0.cmf.xml"
   },
   {
     value: "invalid",
-    label: "Invalid",
     icon: icons.error,
+    label: "Invalid",
     path: "demo/migrate/CrashDriver-NIEM-5.0-v0.6.cmf.xml"
   }
 ]
 
-const demoFileItem = computed(() => {
-  return demoFileItems.find(item => item.value == demoFileKey.value)
+const inputModeItem = computed(() => {
+  return inputModeItems.find(item => item.value == inputMode.value)
 });
 
-watch(demoFileKey, async(newKey, oldKey) => {
+const demoFile = ref();
+
+watch(inputMode, async(value, oldValue) => {
   // Download demo file and update the state
-  if (demoFileItem.value && demoFileItem.value.path && inputMode.value == "demo") {
-    state.file = await ToolboxForm.loadPublicFile(demoFileItem.value.path)
+  if (inputModeItem.value && inputMode.value != "upload") {
+    state.file = await ToolboxForm.loadPublicFile(inputModeItem.value.path)
+    demoFile.value = state.file?.name;
     state.from = "5.0";
   }
   else {
@@ -125,7 +141,6 @@ watch(demoFileKey, async(newKey, oldKey) => {
     state.from = undefined;
   }
 });
-
 
 // *** State ***
 
