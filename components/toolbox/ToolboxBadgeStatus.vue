@@ -4,7 +4,7 @@
     {{ text }}
   </UBadge>
 
-  <CustomIcon v-else-if="icon" :icon="icon" :color="color" :size="6"/>
+  <ToolboxIcon v-else-if="icon" :icon="icon" :color="color" :size="6"/>
 </template>
 
 <script setup lang="ts">

@@ -17,10 +17,9 @@
 <script setup lang="ts">
 import { h, resolveComponent } from 'vue'
 
-const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
 import type { TableColumn } from '@nuxt/ui';
-import CustomTableExpandButton from './CustomTableExpandButton.vue';
+import ToolboxButtonRowExpand from '../toolbox/ToolboxButtonRowExpand.vue';
 
 
 const { test } = defineProps<{ test: APITypes.Test }>();
@@ -67,7 +66,7 @@ function getResultColorClass(severity: APITypes.ResultSeverityCode | APITypes.Re
 const resultColumns: TableColumn<APITypes.TestResult>[] = [
   {
     id: 'expand',
-    cell: ({ row }) => h(CustomTableExpandButton, { row })
+    cell: ({ row }) => h(ToolboxButtonRowExpand, { row })
   },
   // TODO: Refactor status badge
   {

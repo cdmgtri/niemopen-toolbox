@@ -19,7 +19,7 @@
     </template>
 
     <template #developer>
-      <CustomCodePanel title="POST request" :code="code"/>
+      <ToolboxCodePanel title="POST request" :code="code"/>
     </template>
   </PageHeader>
 

@@ -4,7 +4,7 @@
     <template #header>
       <div class="flex justify-between">
         <span class="mt-1">{{ title }}</span>
-        <UButton id="btn-copy" v-if="isSupported" @click="copy(code)" :icon="icons.copy" :class="{ copied }">
+        <UButton id="btn-copy" v-if="isSupported" @click="copyValue(code)" :icon="icon" :class="{ copied }">
           <!-- {{ copied ? "COPIED" : "COPY" }} -->
         </UButton>
       </div>
@@ -24,6 +24,9 @@ import { useClipboard } from "@vueuse/core"
 const { copy, copied, isSupported } = useClipboard();
 
 // TODO: Fix support for Card color and variant props
+
+// LATER: Refactor copy to clipboard functionality
+// Example: https://ui3.nuxt.dev/components/input#with-copy-button
 
 const props = defineProps({
   code: {
@@ -46,6 +49,8 @@ const props = defineProps({
   }
 });
 
+const icon: Ref<string> = ref(icons.copy);
+
 const ui = {
   // TODO: Test hardcoded margin re custom state pseudo class warning
   root: `ring ring-inset ring-[var(--ui-${props.color})]/25 mt-[24px] p-0`,
@@ -53,6 +58,12 @@ const ui = {
   header: `p-2 px-8 text-sm font-medium text-[var(--ui-${props.color})]`,
   body: "p-2 px-8 bg-gray-600 text-white",
   footer: "p-2 px-8 text-sm font-light"
+}
+
+async function copyValue(value: string) {
+  copy(value);
+  icon.value = icons.success;
+  setTimeout(() => icon.value = icons.copy, 1500);
 }
 
 </script>
@@ -63,8 +74,8 @@ const ui = {
   color: var(--ui-text-muted) !important;
 }
 
-#btn-copy.copied>.iconify {
-  color: var(--ui-success) !important;
-}
+// #btn-copy.copied>.iconify {
+//   color: var(--ui-success) !important;
+// }
 
 </style>

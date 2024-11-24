@@ -7,7 +7,7 @@
       </p>
 
       <p>
-        This functionality leverages the <CustomLink :link="AppItems.cmfToolRepo"/> <UKbd>version 0.7-alpha.6</UKbd> which supports <CustomLink :link="AppItems.cmfRepo"/> <UKbd>version 0.8</UKbd>.
+        This functionality leverages the <ToolboxLink :link="AppItems.cmfToolRepo"/> <UKbd>version 0.7-alpha.6</UKbd> which supports <ToolboxLink :link="AppItems.cmfRepo"/> <UKbd>version 0.8</UKbd>.
       </p>
 
       <p class="font-medium">Tips:</p>
@@ -30,7 +30,7 @@
     </template>
 
     <template #developer>
-      <CustomCodePanel title="POST request" :code="code"/>
+      <ToolboxCodePanel title="POST request" :code="code"/>
     </template>
   </PageHeader>
 

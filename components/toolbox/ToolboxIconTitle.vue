@@ -11,6 +11,7 @@
 const { icon, title, classes = "" } = defineProps<{
   icon: string,
   title: string,
-  classes?: string }>();
+  classes?: string
+}>();
 
 </script>

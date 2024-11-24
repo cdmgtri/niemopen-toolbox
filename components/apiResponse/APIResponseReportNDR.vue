@@ -3,7 +3,7 @@
   <div v-if="tests.length > 0">
     <UTable :data="testSummaries" :columns="columns" class="table-ndr-validation-test">
       <template #expanded="{ row }">
-        <CustomValidationNDRResultsTest :row="row" :test-results="results(row.original.testId)"/>
+        <APIResponseReportNDRTest :row="row" :test-results="results(row.original.testId)"/>
       </template>
     </UTable>
   </div>
@@ -12,8 +12,8 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
 import { h } from 'vue'
-import CustomTableExpandButton from './CustomTableExpandButton.vue';
-import CustomIcon from './CustomIcon.vue';
+import ToolboxButtonRowExpand from '../toolbox/ToolboxButtonRowExpand.vue';
+import ToolboxIcon from '../toolbox/ToolboxIcon.vue';
 
 const { tests } = defineProps<{tests: APITypes.Test[]}>();
 
@@ -93,12 +93,12 @@ function results(testId: string) {
 const columns: TableColumn<typeof testSummaries.value[0]>[] = [
   {
     id: 'expand',
-    cell: ({ row }) => h(CustomTableExpandButton, { row })
+    cell: ({ row }) => h(ToolboxButtonRowExpand, { row })
   },
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => h(CustomIcon, {
+    cell: ({ row }) => h(ToolboxIcon, {
       icon: row.original.icon ,
       color: row.original.color
     })

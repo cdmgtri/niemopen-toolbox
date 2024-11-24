@@ -22,10 +22,10 @@
 
       <ul class="bullets">
         <li>
-          Create an issue on the repo at <CustomLink :link="AppItems.toolboxRepo"/> <span class="font-light text-xs">(GitHub account required)</span>
+          Create an issue on the repo at <ToolboxLink :link="AppItems.toolboxRepo"/> <span class="font-light text-xs">(GitHub account required)</span>
         </li>
         <li>
-          Submit a report through <CustomLink :link="AppItems.contact"/>
+          Submit a report through <ToolboxLink :link="AppItems.contact"/>
         </li>
       </ul>
     </template>
@@ -36,7 +36,7 @@
       </p>
 
       <p>
-        The Swagger UI and OpenAPI JSON file are available at <CustomLink :link="AppItems.apiSwaggerUI"/>.
+        The Swagger UI and OpenAPI JSON file are available at <ToolboxLink :link="AppItems.apiSwaggerUI"/>.
       </p>
     </template>
 

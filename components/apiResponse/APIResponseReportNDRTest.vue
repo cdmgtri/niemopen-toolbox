@@ -13,7 +13,7 @@
 
 import type { TableColumn } from '@nuxt/ui';
 import type { Row } from '@tanstack/vue-table'
-import CustomReportTestBadge from './CustomReportTestBadge.vue';
+import ToolboxBadgeStatus from '../toolbox/ToolboxBadgeStatus.vue';
 import { UBadge } from '#components';
 
 const { row, testResults=[] } = defineProps<{
@@ -27,7 +27,7 @@ const columns: TableColumn<APITypes.TestResult>[] = [
     accessorKey: "status",
     header: "Status",
     cell({ row }) {
-      return h(CustomReportTestBadge, {
+      return h(ToolboxBadgeStatus, {
         status: row.original.status,
         display: "text",
       });

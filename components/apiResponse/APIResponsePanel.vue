@@ -1,6 +1,6 @@
 
 <template>
-  <CustomCard v-if="results.request != 'unsent'"
+  <ToolboxCard v-if="results.request != 'unsent'"
   :title="title" :icon="icon" :color="color" :dismissible="true">
 
     <template #default v-if="!results.report">
@@ -25,8 +25,8 @@
           </template>
 
           <template #body="{ item }">
-            <CustomValidationNDRResults v-if="item.kind=='ndr'" :tests="item.tests"/>
-            <CustomReportGenericResults v-else :test="item.tests[0]"/>
+            <APIResponseReportNDR v-if="item.kind=='ndr'" :tests="item.tests"/>
+            <APIResponseReportDefault v-else :test="item.tests[0]"/>
           </template>
         </UAccordion>
 
@@ -37,7 +37,7 @@
       <p>Request returned in {{ results.time }} seconds</p>
     </template>
 
-  </CustomCard>
+  </ToolboxCard>
 </template>
 
 <script setup lang="ts">
