@@ -4,7 +4,7 @@
     {{ text }}
   </UBadge>
 
-  <UIcon v-else-if="icon" :name="icon" :class="iconClasses" :aria-label="text"/>
+  <CustomIcon v-else-if="icon" :icon="icon" :color="color" :size="6"/>
 </template>
 
 <script setup lang="ts">
@@ -18,7 +18,7 @@ const { test, status, display = "both", as = "badge", variant = "subtle" } = def
 }>();
 
 const color = computed(() => {
-  if (test) return API.resultColorClass(test.severity)
+  if (test) return API.statusColor(test.severity)
   return status == "passed" ? "success" : status;
 });
 
@@ -31,7 +31,5 @@ const icon = computed(() => {
   if (display == "text" || !color.value) return undefined;
   return icons[color.value];
 });
-
-const iconClasses = `text-[var(--ui-${color.value})] size-6`;
 
 </script>

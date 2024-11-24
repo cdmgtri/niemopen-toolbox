@@ -97,18 +97,16 @@ const demoFileKey = ref();
 
 const demoFileItems: DemoFileItemType[] = [
   {
-    // TODO: Update valid example filename
     value: "valid",
-    label: "CrashDriver-NIEM-5.0.cmf.xml",
+    label: "Valid",
     icon: icons.success,
     path: "demo/migrate/CrashDriver-NIEM-5.0.cmf.xml"
   },
   {
-    // TODO: Update invalid example file to a NIEM 5.0 file
     value: "invalid",
-    label: "CrashDriver-0.6.cmf.xml",
+    label: "Invalid",
     icon: icons.error,
-    path: "demo/migrate/CrashDriver-0.6.cmf.xml"
+    path: "demo/migrate/CrashDriver-NIEM-5.0-v0.6.cmf.xml"
   }
 ]
 

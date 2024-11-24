@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 
-defineProps<{ link: LinkType }>();
+defineProps<{ link: AppLinkType }>();
 
 const leadingIconClasses = "size-4 align-middle mr-1";
 

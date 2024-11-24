@@ -1,82 +1,83 @@
 
 <template>
-  <UCard v-if="report">
-    <template #header>
-      <span class="mr-1 font-semibold">NDR validation results</span>
-    </template>
-
-    <UTable :data="tests" :columns="testColumns">
+  <div v-if="tests.length > 0">
+    <UTable :data="testSummaries" :columns="columns" class="table-ndr-validation-test">
       <template #expanded="{ row }">
-        <div class="mb-5">
-          <!-- Rule details -->
-           <!-- TODO: Review alert vs paragraph -->
-          <!-- <p class="my-1 ml-4 mb-3 text-wrap">{{ row.original.comment }}</p> -->
-          <UAlert :color="row.original.status" variant="subtle" :title="row.original.comment" class="my-1 mb-3 text-wrap"/>
-
-          <!-- Results table -->
-          <UTable :data="testResults(row.original.testId)" :columns="resultColumns"/>
-        </div>
+        <CustomValidationNDRResultsTest :row="row" :test-results="results(row.original.testId)"/>
       </template>
     </UTable>
-  </UCard>
+  </div>
 </template>
 
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
-import { h, resolveComponent } from 'vue'
-import CustomReportTestBadge from './CustomReportTestBadge.vue';
+import { h } from 'vue'
+import CustomTableExpandButton from './CustomTableExpandButton.vue';
+import CustomIcon from './CustomIcon.vue';
 
-const UButton = resolveComponent('UButton')
-const UBadge = resolveComponent('UBadge')
+const { tests } = defineProps<{tests: APITypes.Test[]}>();
 
-const { results } = defineProps<{results: APITypes.Results}>();
+const allResults = computed(() => {
+  let results = tests.flatMap(test => test.results) || [];
 
-const report = results.report;
+  // TODO-API: Set entity category on test for skipped schemas
+  let utilityMessage = "Skipped validation on NIEM utility schema.";
+  let externalMessage = "This warning can be ignored for external standards that are properly handled via NIEM adapter types.";
 
-const allTestResults = report?.tests.flatMap(test => test.results) || [];
+  results.forEach(item => {
+    if (item.testId == "validate-ndr") {
+      item.entityCategory = "xs:schema";
+      item.entity = item.message == utilityMessage ? utilityMessage : externalMessage;
+    }
+  });
 
-// TODO-API: Set entity category on test for skipped schemas
-allTestResults.forEach(item => {
-  if (item.testId == "validate-ndr") {
-    item.entityCategory = "xs:schema";
-  }
+  return results;
 });
 
-const testResultsMap = new Map(
-  allTestResults.map(item => [item.testId, {
-    testId: item.testId,
-    ruleNumber: item.testId.replace("validate-ndr-rule_", ""),
-    sortNumber: "",
-    count: 0,
-    status: item.status,
-    message: item.message,
-    comment: item.comment
-  }])
-);
+/**
+ * Combine test information from each result into a single unique array of basic test info.
+ */
+const testSummaries = computed(() => {
+  let testIDs = new Set(tests.map(test => test.id));
 
-// Update rule sort number and result counts
-for (let [key, entry] of testResultsMap) {
-  entry.ruleNumber = entry.ruleNumber == "validate-ndr" ? "*****" : entry.ruleNumber;
-  entry.sortNumber = entry.ruleNumber[0] == "1" ? entry.ruleNumber : "0" + entry.ruleNumber;
-  entry.count = testResults(key).length;
-}
+  let summaries: APITypes.TestSummary[] = [];
 
-let entry = testResultsMap.get("validate-ndr");
-if (entry) {
-  entry.message = "Skipped validation on schema"
-  entry.comment = "Check schemas to see if any missed validation due to lack of a conformance target."
-  entry.status = "warning";
-}
+  testIDs.forEach((id) => {
+    let summary: Partial<APITypes.TestSummary> = {};
+    let results = allResults.value.filter(result => result.testId == id);
+    let result = results[0];
 
-const tests = [...testResultsMap.values()]
-.sort((a, b) => {
-  if (a.sortNumber < b.sortNumber) return -1;
-  if (a.sortNumber > b.sortNumber) return 1;
-  return 0;
+    summary.testId = id;
+
+    if (result) {
+      let status = API.resultsStatus(results);
+
+      summary.ruleNumber = result.testId.replace("validate-ndr-rule_", "");
+      summary.sortNumber = (summary.ruleNumber[0] == "1" ? "" : "0") + summary.ruleNumber;
+      summary.comment = result.comment;
+      summary.message = result.message;
+      summary.count = results.length;
+      summary.status = status;
+      summary.color = API.statusColor(status);
+      summary.icon = API.statusIcon(status);
+    }
+
+    // TODO-API: Update test description info for skipped schemas
+    if (id == "validate-ndr") {
+      summary.ruleNumber = "n/a";
+      summary.sortNumber = "00-00";
+      summary.message = "No target namespace found. This attribute is required for NIEM conformant schemas.";
+      summary.comment = "Check schemas to see if any unintentionally missed validation checks due to lack of a valid NDR conformance target."
+    }
+
+    summaries.push(summary as APITypes.TestSummary);
+  });
+
+  return summaries.sort((a, b) => a.sortNumber.localeCompare(b.sortNumber));
 });
 
-function testResults(testId: string) {
-  return allTestResults
+function results(testId: string) {
+  return allResults.value
   .filter(item => item.testId == testId)
   .sort((a, b) => {
     if (a.status < b.status) return -1;
@@ -89,89 +90,42 @@ function testResults(testId: string) {
   });
 }
 
-const testColumns: TableColumn<typeof tests[0]>[] = [
- // TODO: Refactor expandable row
+const columns: TableColumn<typeof testSummaries.value[0]>[] = [
   {
     id: 'expand',
-    cell: ({ row }) =>
-      h(UButton, {
-        color: 'neutral',
-        variant: 'ghost',
-        icon: icons.down,
-        square: true,
-        ui: {
-          leadingIcon: [
-            'transition-transform',
-            row.getIsExpanded() ? 'duration-200 rotate-180' : ''
-          ],
-          base: "bg-transparent"
-        },
-        onClick: () => row.toggleExpanded()
-      })
+    cell: ({ row }) => h(CustomTableExpandButton, { row })
   },
   {
     accessorKey: "status",
     header: "Status",
-    size: 100,
-    cell: ({ row }) => h(CustomReportTestBadge, { status: row.original.status, display: "icon", as: 'icon' })
+    cell: ({ row }) => h(CustomIcon, {
+      icon: row.original.icon ,
+      color: row.original.color
+    })
   },
   {
     accessorKey: "ruleNumber",
-    header({ }) {
-      return h("div", { class: "text-right" }, "Rule")
-    },
-    cell({ row }) {
-      return h("div", { class: "text-right" }, row.original.ruleNumber )
-    }
+    header: ( ) => h("div", { class: "text-right" }, "Rule"),
+    cell: ({ row }) => h("div", { class: "text-right" }, row.original.ruleNumber )
   },
   {
     accessorKey: "message",
-    header: "Message"
+    header: "Message",
   },
   {
     accessorKey: "count",
     header: "Count",
-    cell({ row }) {
-      return h("div", { class: "text-right mr-3" }, row.original.count)
-    },
+    cell: ({ row }) => h("div", { class: "text-right mr-3" }, row.original.count)
   }
 ]
 
-const resultColumns: TableColumn<APITypes.TestResult>[] = [
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell({ row }) {
-      return h(CustomReportTestBadge, {
-        status: row.original.status,
-        display: "text",
-      });
-    },
-    // LATER: Column size isn't working
-    size: 75,
-    maxSize: 75,
-    minSize: 75
-  },
-  {
-    accessorKey: "entityCategory",
-    header() {
-      return h("div", { class: "w-[150px]" }, "Category")
-    },
-    cell({ row }) {
-      return h(UBadge, {
-        color: "neutral",
-        variant: "subtle",
-      }, () => row.original.entityCategory);
-    }
-  },
-  {
-    accessorKey: "entity",
-    header: "Entity"
-  },
-  {
-    accessorKey: "location",
-    header: "Location"
-  }
-];
-
 </script>
+
+<style lang="scss">
+
+// Maximize width of message column
+.table-ndr-validation-test th:nth-child(4) {
+  width: 100%;
+}
+
+</style>

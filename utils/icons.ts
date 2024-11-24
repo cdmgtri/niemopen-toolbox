@@ -10,6 +10,7 @@ export default {
   externalLink: "i-heroicons:arrow-up-right-20-solid",
   standard: "material-symbols:book-2-outline-rounded",
   magic: "material-symbols:magic-button-outline",
+  checklist: "material-symbols:list-alt-check-outline-rounded",
 
   // Pages
   home: "bi:house",
@@ -45,16 +46,16 @@ export default {
   map: "material-symbols:equal-rounded",
   copy: "material-symbols:content-copy-outline-rounded",
   close: "i-heroicons-x-mark-20-solid",
-  upload: "material-symbols-light:upload-file-outline",
-  download: "material-symbols-light:download-file-outline",
+  upload: "material-symbols-light:upload-file-outline-rounded",
+  download: "material-symbols-light:download-rounded",
 
   // Directions and locations
   start: "material-symbols:not-started-rounded",
   end: "material-symbols:stop-circle-rounded",
   down: "material-symbols:keyboard-arrow-down-rounded",
   up: "material-symbols:keyboard-arrow-up-rounded",
-  left: "material-symbols:keyboard-arrow-left-rounded",
-  right: "material-symbols:keyboard-arrow-right-rounded",
+  left: "material-symbols:chevron-left-rounded",
+  right: "material-symbols:chevron-right-rounded",
 
   // Site brands
   github: "mdi:github",

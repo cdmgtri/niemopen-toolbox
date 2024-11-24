@@ -11,15 +11,25 @@
 
     <template #default v-else>
       <div class="spaced">
-        <p>{{ results.message }}</p>
 
-        <UCard v-if="results.status != 'info'">
-          <UTable :data="resultCountData" class="flex-1"/>
-        </UCard>
+        <UAccordion v-model="activeSummaryItem" :items="summaryItems">
+          <template #body>
+            <UTable :data="resultCountData" :ui="{base: 'min-w-80'}"/>
+          </template>
+        </UAccordion>
 
-        <CustomValidationNDRResults v-if="kind=='ndr'" :results="results"/>
+        <UAccordion :default-value="activeReportItems" :items="testItems" type="multiple">
+          <template #default="{ item }">
+            <span class="mr-2">{{ item.label }}</span>
+            <!-- <UBadge :label="item.status" :color="item.color" variant="subtle"/> -->
+          </template>
 
-        <CustomReportGenericResults v-else :tests="results.report?.tests"/>
+          <template #body="{ item }">
+            <CustomValidationNDRResults v-if="item.kind=='ndr'" :tests="item.tests"/>
+            <CustomReportGenericResults v-else :test="item.tests[0]"/>
+          </template>
+        </UAccordion>
+
       </div>
     </template>
 
@@ -32,12 +42,12 @@
 
 <script setup lang="ts">
 
-import type { TableData } from '@nuxt/ui';
+import type { AccordionItem, TableData } from '@nuxt/ui';
 
-const { results, kind } = defineProps<{
-  results: APITypes.Results,
-  kind?: APITypes.ValidationKindType
-}>();
+const { results } = defineProps<{ results: APITypes.Results }>();
+
+const activeSummaryItem = ref("0");
+const activeReportItems = ref<string[]>([]);
 
 const title = computed(() => {
   return results.title || results.status.toUpperCase();
@@ -49,6 +59,14 @@ const color = computed(() => {
   return results.status == 'pending' ? "warning" : results.status;
 });
 
+const summaryItems = computed<AccordionItem[]>(() => {
+  return [
+    {
+      label: results.message,
+      icon: icons.download
+    }
+  ]
+});
 
 const resultCountData = computed<TableData[]>(() => {
   if (!results.report) return [];
@@ -66,6 +84,66 @@ const resultCountData = computed<TableData[]>(() => {
       count: results.report.errors
     },
   ]
+});
+
+const reportTests = computed(() => {
+  return results.report?.tests || [];
+});
+
+const ndrTests = computed(() => {
+  return  reportTests.value.filter(test => test.id.startsWith("validate-ndr"));
+});
+
+const otherTests = computed(() => {
+  return reportTests.value.filter(test => !test.id.startsWith("validate-ndr"));
+});
+
+type TestAccordionItem = Partial<AccordionItem> & {
+  kind?: "ndr",
+  status: string,
+  color: ColorType,
+  tests: APITypes.Test[]
+}
+
+const testItems = computed<TestAccordionItem[]>(() => {
+
+  // Add other tests individually
+  let items: TestAccordionItem[] = otherTests.value.map(test => {
+
+    let tests = otherTests.value.filter(item => item.id == test.id);
+    let status = API.testsStatus(tests);
+
+    return {
+      label: test.id,
+      icon: icons.checklist,
+      tests,
+      status,
+      color: API.statusColor(status)
+    }
+  });
+
+  // Add NDR tests bundled together as one
+  if (ndrTests.value.length > 0) {
+    let status = API.testsStatus(ndrTests.value);
+
+    items.push({
+      label: "NDR validation report",
+      icon: icons.checklist,
+      kind: "ndr",
+      tests: ndrTests.value,
+      status,
+      color: API.statusColor(status)
+    })
+  }
+
+  // Add array indices to report active items to open each accordion item by default
+  let index = 0;
+  items.forEach(item => {
+    activeReportItems.value.push(index.toString());
+    index++;
+  });
+
+  return items;
 });
 
 </script>

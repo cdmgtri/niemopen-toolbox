@@ -1,26 +1,17 @@
 
 <template>
-  <UCard v-for="test in tests" :ui="testUI(test.status)">
+  <p class="font-light mb-4">{{ test.description }}</p>
 
-    <template #header>
-      <UBadge class="mr-2" variant="subtle" :color="getResultColorClass(test.status)">
-        {{ test.status }}
-      </UBadge>
-      <span class="mr-1 font-semibold">{{ test.id }} test results</span>
-    </template>
-
-    <p class="font-light mb-4">{{ test.description }}</p>
-
-    <UTable :data="test.results.sort(sortTestResults)" :columns="resultColumns" sticky>
-      <template #expanded="{ row }">
-        <h3>Path:</h3>
-        <p class="mb-3">{{ row.original.location }}</p>
-        <h3>Error:</h3>
+  <UTable :data="test.results.sort(sortTestResults)" :columns="resultColumns" class="table-generic-validation-results" sticky>
+    <template #expanded="{ row }">
+      <h3>Path:</h3>
+      <p class="mb-3">{{ row.original.location }}</p>
+      <div v-if="row.original.status != 'passed'">
+        <h3>Details:</h3>
         <p class="text-wrap mb-3">{{ row.original.message }}</p>
-      </template>
-    </UTable>
-
-  </UCard>
+      </div>
+    </template>
+  </UTable>
 </template>
 
 <script setup lang="ts">
@@ -29,9 +20,10 @@ import { h, resolveComponent } from 'vue'
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
 import type { TableColumn } from '@nuxt/ui';
+import CustomTableExpandButton from './CustomTableExpandButton.vue';
 
 
-const { tests=[] } = defineProps<{ tests: APITypes.Test[] | undefined }>();
+const { test } = defineProps<{ test: APITypes.Test }>();
 
 
 /**
@@ -73,24 +65,9 @@ function getResultColorClass(severity: APITypes.ResultSeverityCode | APITypes.Re
 }
 
 const resultColumns: TableColumn<APITypes.TestResult>[] = [
-  // TODO: Refactor expandable row
   {
     id: 'expand',
-    cell: ({ row }) =>
-      h(UButton, {
-        color: 'neutral',
-        variant: 'ghost',
-        icon: icons.down,
-        square: true,
-        ui: {
-          leadingIcon: [
-            'transition-transform',
-            row.getIsExpanded() ? 'duration-200 rotate-180' : ''
-          ],
-          base: "bg-transparent"
-        },
-        onClick: () => row.toggleExpanded()
-      })
+    cell: ({ row }) => h(CustomTableExpandButton, { row })
   },
   // TODO: Refactor status badge
   {
@@ -148,3 +125,16 @@ const resultColumns: TableColumn<APITypes.TestResult>[] = [
 
 
 </script>
+
+<style lang="scss">
+
+.table-generic-validation-results td:nth-child(4) {
+  width: 100%;
+  white-space: normal !important;
+}
+
+.table-generic-validation-results td:nth-child(5) {
+  white-space: no-wrap;
+}
+
+</style>

@@ -7,7 +7,7 @@
 
 const { results } = defineProps<{results: APITypes.Results}>();
 
-const color = computed(() => API.reportColorClass(results.report));
+const color = computed(() => API.reportColor(results.report));
 
 const text = computed(() => {
   if (!results.report) return "n/a";

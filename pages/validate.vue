@@ -56,6 +56,7 @@
       label="1. Select validation kind"
       :help="validationItem?.description"
       >
+      <!-- @vue-expect-error -->
         <USelect v-model="state.kind" :items="validationMenuItems" @change="onValidationKindChange" :icon="validationItem?.icon" class="w-64"/>
       </UFormField>
 
@@ -85,6 +86,7 @@
         </span>
 
         <!-- Select upload file or demo file option -->
+        <!-- @vue-expect-error -->
         <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode" :icon="inputModelSelectedItem?.icon"/>
 
       </UFormField>
@@ -122,14 +124,22 @@
 <script setup lang="ts">
 
 import type { SelectItem } from "@nuxt/ui";
+import type { InputFileType } from "../utils/toolbox/validation";
+import { validationMenuItems } from "../utils/toolbox/validation";
 
 // *** Input mode ***
 
-// Allow user to choose between uploading file and using an available demo file
-const inputMode = ref<"upload"|"valid"|"invalid">("upload");
+type InputMode = "upload" | "valid" | "invalid";
 
-// const inputModeItems = ["upload", "valid", "invalid"];
-const inputModeItems: SelectItem[] = [
+// Allow user to choose between uploading file and using an available demo file
+const inputMode: Ref<InputMode> = ref("upload");
+
+type InputModeItem = SelectItem & {
+  value?: InputMode,
+  icon?: IconType
+}
+
+const inputModeItems: InputModeItem[] = [
   {
     value: "upload",
     icon: icons.upload,
@@ -219,7 +229,7 @@ async function updateFiles() {
 // *** State ***
 
 type ValidateStateType = {
-  kind: ValidationKindType,
+  kind: APITypes.ValidationKindType,
   file1: File
   file2?: File,
   mediaType: "json" | "csv"
@@ -228,163 +238,6 @@ type ValidateStateType = {
 const state = reactive<Partial<ValidateStateType>>({
   mediaType: "json"
 });
-
-type InputFileType = {
-  description: string,
-  icon: string,
-  paramName: string,
-  file?: File,
-  validExtensions: string[],
-  pathValidExample: string,
-  pathInvalidExample: string
-}
-
-type ValidationItemType = SelectItem & {
-  value?: APITypes.ValidationKindType,
-  description?: string,
-  note?: string,
-  group: "display" | "XSD" | "XML",
-  extensions?: string[],
-  route?: string,
-  file1?: InputFileType,
-  file2?: InputFileType
-}
-
-const validationMenuItems: ValidationItemType[] = [
-  {
-    label: "XML schemas",
-    type: "label",
-    group: "display",
-  },
-  {
-    value: "ndr",
-    label: "Validate NDR conformance",
-    type: "item",
-    description: "Check one or more NIEM XML schemas against the NIEM Naming and Design Rules (NDR)",
-    extensions: ["xsd", "zip"],
-    icon: icons.book,
-    group: "XSD",
-    route: API.routes.validate_ndr,
-    file1: {
-      icon: icons.xml,
-      description: "NIEM XSD",
-      paramName: "file",
-      validExtensions: [".xsd", ".zip"],
-      pathValidExample: "demo/validate/ndr/CrashDriver-6.0.zip",
-      pathInvalidExample : "demo/validate/ndr/Crash Driver IEPD-invalid.zip"
-    }
-  },
-  {
-    value: "xsd",
-    label: "Validate NIEM XSD",
-    type: "item",
-    description: "Validate one or more XML schemas to check that the basic syntax is correct.",
-    extensions: ["xsd", "zip"],
-    icon: icons.xml,
-    group: "XSD",
-    route: API.routes.validate_xsd,
-    file1: {
-      icon: icons.xml,
-      description: "NIEM XSD",
-      paramName: "file",
-      validExtensions: [".xsd", ".zip"],
-      pathValidExample: "demo/validate/xml/single/person.xsd",
-      pathInvalidExample : "demo/validate/xml/single/person-invalid.xsd"
-    }
-  },
-  {
-    type: "separator",
-    group: "display"
-  },
-  {
-    label: "XML instances",
-    type: "label",
-    group: "display"
-  },
-  // TODO: Fix validate CMF call
-  {
-    value: "cmf",
-    label: "Validate CMF",
-    type: "item",
-    description: "Validate a CMF file (an XML instance file) against its NIEM CMF XML schema.",
-    note: "Note that this does not check NDR conformance of the content.",
-    extensions: ["xml", "cmf"],
-    icon: icons.xml,
-    group: "XML",
-    route: API.routes.validate_cmf,
-    file1: {
-      icon: icons.xml,
-      description: "CMF",
-      paramName: "file",
-      validExtensions: [".cmf", ".xml"],
-      pathValidExample: "demo/validate/xml/cmf/CrashDriver.cmf.xml",
-      pathInvalidExample : "demo/validate/xml/cmf/CrashDriver-invalid.cmf.xml"
-    }
-  },
-  {
-    value: "xml",
-    label: "Validate XML",
-    type: "item",
-    description: "Validate one or more XML instances against its user-provided XML schemas.",
-    extensions: ["xml"],
-    icon: icons.xml,
-    group: "XML",
-    route: API.routes.validate_xml,
-    file1: {
-      icon: icons.xml,
-      description: "XML instance",
-      paramName: "xml",
-      validExtensions: [".xml"],
-      pathValidExample: "demo/validate/xml/single/person.xml",
-      pathInvalidExample : "demo/validate/xml/single/person-invalid.xml"
-
-    },
-    file2: {
-      icon: icons.zip,
-      description: "NIEM XSD",
-      paramName: "xsd",
-      validExtensions: [".xsd", ".zip"],
-      pathValidExample: "demo/validate/xml/single/person.xsd",
-      pathInvalidExample: "demo/validate/xml/single/person.xsd"
-    }
-  },
-  {
-    value: "message-catalog",
-    label: "Validate message catalog",
-    type: "item",
-    description: "Validate an IEPD or message catalog (an XML instance file) against its NIEM IEPD / message catalog schema.",
-    extensions: ["xml"],
-    icon: icons.xml,
-    group: "XML",
-    route: API.routes.validate_message_catalog,
-    file1: {
-      icon: icons.xml,
-      description: "message-catalog.xml or iepd-catalog.xml",
-      paramName: "file",
-      validExtensions: [".xml"],
-      pathValidExample: "demo/validate/xml/message-catalog/valid-5.0/iepd-catalog.xml",
-      pathInvalidExample : "demo/validate/xml/message-catalog/invalid-5.0/iepd-catalog.xml"
-    }
-  },
-  {
-    value: "xml-catalog",
-    label: "Validate XML catalog",
-    type: "item",
-    description: "Validate an XML catalog (an XML instance file) against the OASIS schema specification for XML catalogs.",
-    extensions: ["xml"],
-    icon: icons.xml,
-    group: "XML",
-    route: API.routes.validate_xml_catalog,
-    file1: {
-      icon: icons.xml,
-      description: "xml-catalog.xml",
-      paramName: "file",
-      validExtensions: [".xml"],
-      pathValidExample: "demo/validate/xml/xml-catalog/xml-catalog-valid.xml",
-      pathInvalidExample : "demo/validate/xml/xml-catalog/xml-catalog-invalid.xml"
-    }
-  }
-]
 
 const validationItems = reactive(validationMenuItems.filter(item => item.type == "item"));
 
@@ -502,12 +355,12 @@ async function onSubmit() {
   customState.mediaType = state.mediaType;
 
   // Set the filename for the download results, with qualifier to distinguish kinds of validation.
-  let baseName = state.file1.name.split(".")[0].replaceAll(" ", "-");
+  let baseName = state.file1.name.split(".").slice(0, -1).join(".").replaceAll(" ", "-");
   let qualifier = validationItem.value.value == "message-catalog" || validationItem.value.value == "xml-catalog" ? "" : validationItem.value.value + "-";
   results.filename = `${baseName}-${qualifier}validation-report.${state.mediaType}`;
 
   // Make the validation request from the NIEM API and download the results
-  const response = await API.post(validationItem.value.route, customState, results);
+  const response = await API.post(validationItem.value.route, customState, results, false);
   await API.downloadReportResults(state.mediaType as APIMediaType, response, results);
 
   // Reset validation checks

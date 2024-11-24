@@ -59,6 +59,18 @@ declare namespace APITypes {
     comment: string
   }
 
+  type TestSummary = {
+    testId: string,
+    status: APITypes.ResultStatusCode,
+    ruleNumber: string,
+    sortNumber: string,
+    count: number,
+    color: ColorType,
+    icon: IconType,
+    message: string,
+    comment: string
+  }
+
   type ValidationKindType = "ndr" | "xsd" | "xml" | "cmf" | "xml-catalog" | "message-catalog";
 
 }

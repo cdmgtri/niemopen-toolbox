@@ -11,18 +11,16 @@ type StateType = { [key: string]: any };
 
 export class API {
 
-  static readonly baseUrl = "https://tools.niem.gov/api/v2/";
-
   static readonly routes = {
-    baseUrl: API.baseUrl,
-    transform: API.baseUrl + "transforms/models",
-    migrate: API.baseUrl + "migration/cmf",
-    validate_xsd: API.baseUrl + "validation/schemas/xml",
-    validate_ndr: API.baseUrl + "validation/schemas/ndr",
-    validate_cmf: API.baseUrl + "validation/cmf/xml",
-    validate_xml: API.baseUrl + "validation/instances/xml",
-    validate_xml_catalog: API.baseUrl + "validation/xml-catalog",
-    validate_message_catalog: API.baseUrl + "validation/message-catalog",
+    baseUrl: Config.baseURL,
+    transform: Config.baseURL + "transforms/models",
+    migrate: Config.baseURL + "migration/cmf",
+    validate_xsd: Config.baseURL + "validation/schemas/xml",
+    validate_ndr: Config.baseURL + "validation/schemas/ndr",
+    validate_cmf: Config.baseURL + "validation/cmf/xml",
+    validate_xml: Config.baseURL + "validation/instances/xml",
+    validate_xml_catalog: Config.baseURL + "validation/xml-catalog",
+    validate_message_catalog: Config.baseURL + "validation/message-catalog",
   }
 
   /**
@@ -31,7 +29,7 @@ export class API {
    * Post: Updates results with basic status information about the response
    * (can be overwritten) and the elapsed time of the request.
    */
-  static async post(route: string, state: StateType, results: APITypes.Results, downloadReport = false) {
+  static async post(route: string, state: StateType, results: APITypes.Results, loadSuccessMessage = true) {
     // Pre-request: Load body and set start time
     let body = ToolboxForm.formBody(state);
     API.updateResultsRequestSent(results);
@@ -48,16 +46,14 @@ export class API {
       method: "post"
     });
 
-    // Post request: Log runtime
-
     // Log basic information about the response
-    if (response.ok) {
+    if (loadSuccessMessage && response.ok) {
       // Success message
       results.status = "success";
       results.error = undefined;
       results.title = "";
     }
-    else {
+    else if (!response.ok) {
       // Error message
       results.status = "error";
       results.error = await response.json() || await response.text();
@@ -66,9 +62,7 @@ export class API {
       console.error("Request failed");
     }
 
-    if (downloadReport) {
-    }
-
+    // Log runtime and request status
     results.time = API.computeTimeInSeconds(results.start as number);
     results.request = "returned";
 
@@ -117,7 +111,7 @@ export class API {
       return;
     }
 
-    results.status = API.reportColorClass(results.report);
+    results.status = API.reportColor(results.report);
     results.message = `Downloaded ${results.filename}.`;
 
     API.downloadFile(blob, results.filename);
@@ -165,26 +159,67 @@ export class API {
     return mediaType == "json" || mediaType == undefined ? "" : `?mediaType=${mediaType}`;
   }
 
-  // TODO: Rename resultColorClass
-  static resultColorClass(severity: APITypes.ResultSeverityCode | APITypes.ResultStatusCode) {
-    switch (severity) {
+  static statusColor(status: APITypes.ResultSeverityCode | APITypes.ResultStatusCode) {
+    switch (status) {
       case "error": return "error";
-      case "info": return "info";
       case "warning": return "warning";
       case 'passed': return "success";
+      case "info": return "info";
     }
   }
 
-  // TODO: Rename reportColorClass or remove
+  static statusIcon(status: APITypes.ResultSeverityCode | APITypes.ResultStatusCode) {
+    switch (status) {
+      case "error": return icons.error;
+      case "warning": return icons.warning;
+      case "passed": return icons.success;
+      case "info": return icons.info;
+    }
+  }
+
   /**
-   * Returns success, warning, error color classes based on
-   * whether or not the report contains errors or warnings.  Informational items are not included.
+   * Returns success, warning, error color classes based on whether or not
+   * the report contains errors or warnings. Informational items are not included.
    */
-  static reportColorClass(report: APITypes.Report | undefined) {
+  static reportColor(report: APITypes.Report | undefined) {
     if (!report) return "info";
     if (report.errors) return "error";
     if (report.warnings) return "warning";
     return "success";
+  }
+
+  /**
+   * Returns an overall status label based on whether or not the report contains
+   * errors or warnings.
+   */
+  static reportStatus(report: APITypes.Report | undefined) {
+    if (!report) return undefined;
+    if (report.errors) return "errors";
+    if (report.warnings) return "warnings";
+    return "passed";
+  }
+
+  /**
+   * Returns an overall status label based on whether any of the results in any
+   * of the given tests has errors or warnings.
+   */
+  static testsStatus(tests: APITypes.Test[]): APITypes.ResultStatusCode {
+    let results = tests.flatMap(test => test.results);
+    let statuses = results.map(result => result.status);
+    if (statuses.includes("error")) return "error";
+    if (statuses.includes("warning")) return "warning";
+    return "passed";
+  }
+
+  /**
+   * Returns an overall status label based on whether any of the given results
+   * has errors or warnings.
+   */
+  static resultsStatus(results: APITypes.TestResult[]): APITypes.ResultStatusCode {
+    let statuses = results.map(result => result.status);
+    if (statuses.includes("error")) return "error";
+    if (statuses.includes("warning")) return "warning";
+    return "passed";
   }
 
   /**

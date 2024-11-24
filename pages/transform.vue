@@ -119,17 +119,17 @@ const demoFileItems: DemoFileItemType[] = [
   },
   {
     value: "cmf",
-    label: "CrashDriver.cmf.xml",
+    label: "CrashDriver-5.0.cmf.xml",
     icon: icons.cmf,
     from: "cmf",
-    path: "demo/transform/CrashDriver.cmf.xml"
+    path: "demo/transform/CrashDriver-5.0.cmf.xml"
   },
   {
     value: "xsd",
-    label: "CrashDriver.xsd.zip",
+    label: "CrashDriver-5.0.xsd.zip",
     icon: icons.xml,
     from: "xsd",
-    path: "demo/transform/CrashDriver.zip"
+    path: "demo/transform/CrashDriver-5.0.zip"
   },
   {
     type: "separator"
@@ -140,17 +140,17 @@ const demoFileItems: DemoFileItemType[] = [
   },
   {
     value: "cmf-invalid",
-    label: "CrashDriver-version-0.6.cmf.xml",
+    label: "CrashDriver-cmf-version-0.6.cmf.xml",
     icon: icons.error,
     from: "cmf",
-    path: "demo/transform/CrashDriver-0.6.cmf.xml"
+    path: "demo/transform/CrashDriver-5.0-CMFv0.6.cmf.xml"
   },
   {
     value: "txt-invalid",
     label: "CrashDriver.txt",
     icon: icons.error,
     from: undefined,
-    path: "demo/transform/CrashDriver.txt"
+    path: "demo/transform/CrashDriver-5.0.txt"
   }
 ]
 
