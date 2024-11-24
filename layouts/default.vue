@@ -9,8 +9,7 @@
     <div id="page-contents">
       <slot/>
     </div>
-    <!-- TODO: Replace scroll top component -->
-    <!-- <PageFooterScrollTop /> -->
+    <PageScrollTop />
   </main>
 
   <footer>
