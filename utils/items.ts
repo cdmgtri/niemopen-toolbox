@@ -66,7 +66,8 @@ const AppItemsHelper = {
   },
   migrate: {
     value: "migrate",
-    to: "/migrate",
+    to: undefined,
+    // to: "/migrate",
     label: "Migrate a model",
     icon: icons.migrate,
     description: "Update a NIEM subset to a more recent version."

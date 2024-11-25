@@ -31,6 +31,19 @@ type NoteType = {
 
 const notes: NoteType[] = [
   {
+    header: "Alpha 2.1: 2024-11-25",
+    features: [
+      {
+        summary: "Updated validation reports",
+        description: "Improved display for validation reports and added a custom report for NDR validation to group results across all files by rule number."
+      },
+      {
+        summary: "Updated demo files",
+        description: "Added demo files to the validation page.  Updated the way demo files are access in the transform page for better consistency across the application."
+      }
+    ]
+  },
+  {
     header: "Alpha 2: 2024-11-14",
     features: [
       // {
@@ -73,6 +86,8 @@ const notes: NoteType[] = [
 </script>
 
 <style scoped lang="scss">
+
+// TODO: Update styling
 
   .card {
     margin-bottom: 18px;
