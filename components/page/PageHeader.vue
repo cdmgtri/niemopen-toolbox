@@ -20,6 +20,7 @@
               :id="'btn-' + panel.value"
               :icon="panel.icon"
               :disabled="!$slots[panel.value]"
+              :ui="ui"
               @click="toggle"
               v-bind:class="{ 'open': activePanelID == panel.value }"
             />
@@ -81,6 +82,10 @@ function toggle(e: Event) {
   activePanelID.value = activePanelID.value == selectedPanelID ? undefined : selectedPanelID;
 }
 
+const ui = {
+  base: "disabled:cursor-auto disabled:text-[var(--ui-text-dimmed)] disabled:hover:text-[var-(--ui-text-dimmed)] hover:text-[var(--ui-text-highlighted)]"
+}
+
 </script>
 
 <style lang="scss">
@@ -88,7 +93,7 @@ function toggle(e: Event) {
 // Style is unscoped to support styles on teleport.
 
 #page-header {
-  background-color: var(--color-light);
+  background-color: var(--ui-secondary);
   border: 1px solid gainsboro;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
@@ -102,4 +107,13 @@ function toggle(e: Event) {
 #page-header button {
   background-color: white;
 }
+
+#page-header button.open {
+  background-color: var(--ui-primary) !important;
+}
+
+#page-header button.open>.iconify {
+  color: white;
+}
+
 </style>

@@ -4,7 +4,6 @@
 // @use "tailwindcss";
 // @import "@nuxt/ui";
 
-@import url("icons.scss");
 // @import url("variables.scss");
 
 @tailwind base;
@@ -20,18 +19,12 @@ a[href]:hover {
   font-weight: bolder;
 }
 
-// TODO: button:active styling
-// button:active {
-  // background-color: dimgray !important;
-  // color: white !important;
-// }
+button:disabled {
+  cursor: auto;
+}
 
 button:hover {
   font-weight: bolder;
-}
-
-.color-niem {
-  color: var(--color-niem);
 }
 
 form > *:not(:first-child), .spaced > *:not(:first-child) {
@@ -77,10 +70,6 @@ kbd {
 }
 
 ul.bullets {
-  // TODO: Figure out how to apply classes
-  // @apply list-disc;
-  // @apply list-outside;
-  // @apply ml5;
   list-style-type: disc;
   list-style-position: outside;
   margin-left: 18px;

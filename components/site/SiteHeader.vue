@@ -23,7 +23,7 @@ const items = [
 ] as NavigationMenuItem[];
 
 const ui = {
-  root: "flex justify-between h-12 bg-[var(--color-niem)] p-4",
+  root: "flex justify-between h-12 bg-[var(--ui-primary)] p-4",
   // Display drop-down as single small (not full width) column on right
   viewportWrapper: "w-48 right-0 left-auto",
   childList: "grid-cols-1 ",

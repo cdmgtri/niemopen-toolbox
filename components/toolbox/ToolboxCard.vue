@@ -32,7 +32,7 @@ const { title, icon, color="neutral", dismissible=false } = defineProps<{
 
 const panelDisplay: Ref<""|"hidden"> = ref("");
 
-const cardClasses = computed(() => `mt-[--app-vertical-spacer] ${panelDisplay.value}`);
+const cardClasses = computed(() => `mt-[var(--app-vertical-spacer)] ${panelDisplay.value}`);
 
 const closeButtonClasses = `right-0 p-0.5 bg-transparent text-[var(--ui-text-muted)] hover:text-[var(--ui-text)] font-medium text-sm hover:bg-inherit align-sub`;
 

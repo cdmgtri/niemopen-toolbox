@@ -40,19 +40,19 @@
 
         <!-- Upload file input -->
         <span v-if="inputMode=='upload'">
-          <UInput type="file" id="uploadFileElement" @change="onFileChange" accept=".cmf,.cmf.xml,.xml" :icon="icons.upload" :ui="ui.inputFileInGroup">
+          <UInput type="file" id="uploadFileElement" @change="onFileChange" accept=".cmf,.cmf.xml,.xml" :icon="icons.upload" :ui="UI.inputFileInGroup">
             <template #trailing>(CMF)</template>
           </UInput>
         </span>
 
         <!-- Demo file input -->
         <span v-else>
-          <UInput v-model="demoFile" :ui="ui.inputFileInGroup" :icon="icons.magic"/>
+          <UInput v-model="demoFile" :ui="UI.inputFileInGroup" :icon="icons.magic"/>
         </span>
 
         <!-- Select upload file or demo file option -->
         <!-- @vue-expect-error -->
-        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="ui.inputMode" :icon="inputModeItem?.icon"/>
+        <USelect v-model="inputMode" :items="inputModeItems" color="neutral" variant="subtle" :ui="UI.inputMode" :icon="inputModeItem?.icon"/>
 
       </UFormField>
 
@@ -66,8 +66,7 @@
         <USelect v-model="state.to" :items="toItems" :icon="icons.end" class="w-64"/>
       </UFormField>
 
-      <!-- TODO: Fix invisible background and text colors on button components without having to use ui-->
-      <UButton type="submit" :ui="ui.button_default">Migrate</UButton>
+      <UButton type="submit">Migrate</UButton>
 
     </UForm>
 
@@ -238,13 +237,3 @@ async function onSubmit() {
 }
 
 </script>
-
-<style scoped lang="scss">
-
-
-#submit  {
-  background-color: var(--color-niem) !important;
-  color: white !important;
-}
-
-</style>

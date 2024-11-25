@@ -23,7 +23,7 @@ await callOnce(async () => {
 
   :root {
     --ui-primary: #297DB3;
-    --ui-secondary: #297eb32f;
+    --ui-secondary: whitesmoke;
   }
 
   @theme {
