@@ -1,10 +1,75 @@
 
-declare namespace NIEMTypes {
+declare global {
 
-  type StewardRef = {
+  type StewardParams = {
+    stewardKey: string
+  }
+
+  type ModelParams = {
+    steward: StewardRef,
+    modelKey: string
+  }
+
+  type VersionParams = ModelParams & {
+    steward: StewardRef,
+    model: ModelRef,
+    versionNumber: string
+  }
+
+  type EntityType = {
+    "@id": string,
+    "@type": string,
+    localIdentifier: string,
     route: string,
+    title: string
+  }
+
+  type EntityRef = {
+    route: string
+  }
+
+  type StewardCategory = "Federal" | "State" | "Local" | "Tribal" | "Territorial" | "International" | "Industry" | "Nonprofit" | "SDO" | "Educational" | "Person" | "Other";
+
+  type StewardType = EntityType & {
+    "@type": "Steward",
+    address?: string,
+    category?: StewardCategory,
+    contactName?: string,
+    country?: string,
+    description?: string,
+    email?: string,
+    fullName?: string,
+    phone?: string,
+    shortName: string,
+    stewardKey: string,
+    subunit: string,
+    unit: string,
+    website: string
+  }
+
+  type StewardRef = EntityRef & {
     stewardKey: string,
     shortName: string
+  }
+
+
+  type ModelCategory = "reference" | "message" | "other";
+
+  type ModelType = EntityType & {
+    "@type": "Model",
+    category?: ModelCategory,
+    description?: string,
+    developer?: string,
+    fullName?: string,
+    keywords?: string,
+    modelKey: string,
+    objective?: string,
+    purpose?: string,
+    repo?: string,
+    shortName: string,
+    steward: StewardRef,
+    subjects?: string,
+    website?: string
   }
 
   type ModelRef = {
@@ -22,7 +87,7 @@ declare namespace NIEMTypes {
     niemVersionNumber: string
   }
 
-  type VersionFull = {
+  type VersionType = {
     "@id": string;
     "@type": string;
     category: VersionCategoryType;
@@ -53,7 +118,7 @@ declare namespace NIEMTypes {
     uri: string
   }
 
-  type NamespaceFull = {
+  type NamespaceType = {
     "@id": string,
     "@type": "Namespace",
     prefix: string,
@@ -89,7 +154,7 @@ declare namespace NIEMTypes {
     category: PropertyCategory
   }
 
-  type PropertyFull = {
+  type Property = {
     "@id": string,
     "@type": "Property",
     prefix: string,
@@ -157,3 +222,5 @@ declare namespace NIEMTypes {
   }
 
 }
+
+export {};

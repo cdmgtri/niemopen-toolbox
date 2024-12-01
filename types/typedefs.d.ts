@@ -6,10 +6,11 @@ declare global {
   type IconType = typeof icons[IconKeyType];
 
   type AppLinkType = LinkProps & {
-    value: "brand" | "home" | ToolType | SiteSettingsType | ReferenceType,
-    label: string,
+    // TODO: Unresolved link value types
+    value?: "brand" | "home" | ToolType | SiteSettingsType | ReferenceType,
+    label?: string,
     description?: string,
-    icon: IconType
+    icon?: IconType
   }
 
   type DemoFileItemType = SelectItem & {
@@ -17,7 +18,7 @@ declare global {
     path?: string
   }
 
-  type ColorType = "success" | "error" | "warning" | "info" | "neutral";
+  type ColorType = "success" | "error" | "warning" | "info" | "neutral" | "primary" | "secondary";
 
 }
 

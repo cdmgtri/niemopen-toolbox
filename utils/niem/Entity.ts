@@ -1,6 +1,13 @@
-import type { Version } from "./Version";
 
-export abstract class Item {
+export type InfoItemFormat = "link" | "email";
+
+export type InfoItem = {
+  field: string,
+  value: string,
+  format?: InfoItemFormat
+}
+
+export abstract class Entity {
 
   /**
    * Edit mode of the item.
@@ -29,13 +36,6 @@ export abstract class Item {
    */
   id = "";
 
-  /**
-   * ID of item that is unique only within its version or other scope.
-   * @example - A prefix for a namespace.
-   * @example - A qname for a component.
-   */
-  abstract get localID(): string;
-
   static id(...args: any[]): string {
     throw new Error("Method not implemented");
   }
@@ -44,29 +44,19 @@ export abstract class Item {
     throw new Error("Method not implemented");
   }
 
-}
+  static infoItems(...args: any[]): InfoItem[] {
+    throw new Error("Method not implemented");
+  }
 
-export abstract class VersionedItem extends Item {
-
-  modelID = "";
-
-  /**
-   * Version of NIEM which this item is coherent with.
-   */
-  niemVersionNumber = "";
-
-  stewardID = "";
-
-  versionID = "";
-
-  constructor(version?: Version) {
-    super();
-    if (version) {
-      this.stewardID = version.stewardID;
-      this.modelID = version.modelID;
-      this.versionID = version.id;
+  static addInfoItem(infoItems: InfoItem[], field: string, value: string | undefined, format?: InfoItemFormat) {
+    if (value) {
+      infoItems.push({field, value, format});
     }
   }
+
+}
+
+export abstract class VersionedItem extends Entity {
 
   abstract toCMF(): any;
 

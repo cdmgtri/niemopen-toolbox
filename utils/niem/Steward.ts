@@ -1,65 +1,38 @@
-import { Item } from "./Item"
+import { Entity, type InfoItem } from "./Entity"
 
-export type StewardCategory = "Federal" | "State" | "Local" | "Tribal" | "Territorial" | "International" | "Industry" | "Nonprofit" | "SDO" | "Educational" | "Person" | "Other" | undefined;
-
-export class Steward extends Item {
-
-  address = "";
-
-  category: StewardCategory | undefined;
-
-  contactName = "";
-
-  country = "";
-
-  description = "";
-
-  email = "";
-
-  fullName = "";
-
-  get localID() {
-    return this.stewardKey;
-  }
-
-  phone = "";
-
-  _shortName = "";
-
-  get shortName() {
-    return this._shortName;
-  }
-
-  set shortName(value: string) {
-    this._shortName = value;
-    this.stewardKey = slugify(value);
-    this.id = this.stewardKey;
-  }
-
-  stewardKey = "";
-
-  subunit = "";
-
-  title = "";
-
-  unit = "";
-
-  website = "";
+export class Steward extends Entity {
 
   static readonly NIEMStewardKey = "niem";
-
-
-  constructor(shortName: string) {
-    super();
-    this.shortName = shortName;
-  }
 
   static override id(stewardKey: string | undefined) {
     return stewardKey || "";
   }
 
-  static override route(stewardKey: string) {
-    return `/stewards/${stewardKey}`;
+  static override route(params?: StewardParams) {
+    let base = Config.baseURL + "stewards";
+    if (params) {
+      return `${ base }/${ params.stewardKey }`
+    }
+    return base;
+  }
+
+  static override infoItems(steward: StewardType) {
+    let items: InfoItem[] = [];
+
+    let unit = steward.unit + (steward.unit && steward.subunit ? " | " : "") + steward.subunit;
+
+    Entity.addInfoItem(items, "Full name", steward.fullName);
+    Entity.addInfoItem(items, "Unit", unit);
+    Entity.addInfoItem(items, "Description", steward.description);
+    Entity.addInfoItem(items, "Category", steward.category);
+    Entity.addInfoItem(items, "Contact", steward.contactName);
+    Entity.addInfoItem(items, "Address", steward.address);
+    Entity.addInfoItem(items, "Country", steward.country);
+    Entity.addInfoItem(items, "Website", steward.website, "link");
+    Entity.addInfoItem(items, "Email", steward.email, "email");
+    Entity.addInfoItem(items, "Phone", steward.phone);
+
+    return items;
   }
 
 }

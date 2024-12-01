@@ -1,80 +1,37 @@
-import { Item } from "./Item";
+import { Entity, type InfoItem } from "./Entity";
 import { Steward } from "./Steward";
 
-export type ModelCategory = "reference" | "message" | "other" | undefined;
-
-export class Model extends Item {
-
-  category: ModelCategory;
-
-  description = "";
-
-  developer = "";
-
-  fullName = "";
-
-  keywords = "";
-
-  get localID() {
-    return this.modelKey;
-  }
-
-  _modelKey = "";
-
-  get modelKey() {
-    return this._modelKey;
-  }
-
-  objective = "";
-
-  purpose = "";
-
-  repo = "";
-
-  _shortName = "";
-
-  get shortName() {
-    return this._shortName;
-  }
-
-  set shortName(value) {
-    this._shortName = value;
-    this._modelKey = slugify(value);
-    this.id = Model.id(this.stewardID, this._modelKey);
-  }
-
-  stewardID = "";
-
-  subjects = "";
-
-  title = "";
-
-  website = "";
+export class Model extends Entity {
 
   static readonly NIEMModelKey = "model";
   static readonly NIEMModelID = Model.id(Steward.NIEMStewardKey, this.NIEMModelKey);
-
-  steward: Steward | undefined;
-
-  title2() {
-    return `[${this.steward?.shortName}] ${this.shortName}`;
-  }
-
-  constructor(steward: Steward, shortName: string, category?: ModelCategory, ) {
-    super();
-    this.stewardID = steward.id;
-    this.shortName = shortName;
-    this.category = category;
-    this.title = `[${steward.shortName}] ${this.shortName}`;
-    this.steward = steward;
-  }
 
   static override id(stewardID: string, modelKey: string) {
     return `${stewardID}/${modelKey}`;
   }
 
-  static override route(stewardKey: string, modelKey: string) {
-    return `${Steward.route(stewardKey)}/models/${modelKey}`;
+  static override route(params: StewardParams | ModelParams) {
+    if ("modelKey" in params) {
+      return `${ Steward.route(params.steward) }/models/${ params.modelKey }`;
+    }
+    return `${ Steward.route(params) }/models`;
+  }
+
+  static override infoItems(model: ModelType) {
+    let items: InfoItem[] = [];
+
+    Entity.addInfoItem(items, "Full name", model.fullName);
+    Entity.addInfoItem(items, "Description", model.description);
+    Entity.addInfoItem(items, "Category", model.category);
+    Entity.addInfoItem(items, "Website", model.website, "link");
+    Entity.addInfoItem(items, "Repo", model.repo, "link");
+    Entity.addInfoItem(items, "Developer", model.developer);
+    Entity.addInfoItem(items, "Keywords", model.keywords);
+    Entity.addInfoItem(items, "Objective", model.objective);
+    Entity.addInfoItem(items, "Purpose", model.purpose);
+    Entity.addInfoItem(items, "Subjects", model.subjects);
+
+    return items;
   }
 
 }

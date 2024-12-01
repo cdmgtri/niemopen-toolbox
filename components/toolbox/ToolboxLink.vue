@@ -6,7 +6,7 @@
     <!-- Leading icon if available -->
     <UIcon v-if="link.icon" :name="link.icon" :class="leadingIconClasses"/>
 
-    <span>{{ link.label }}</span>
+    <span>{{ link.label || link.to }}</span>
   </ULink>
 
   <!-- Trailing external link icon if applicable -->

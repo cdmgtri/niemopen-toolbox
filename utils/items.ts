@@ -24,7 +24,7 @@ const AppItemsHelper = {
   },
   browse: {
     value: "browse",
-    to: undefined,
+    to: "/browse",
     label: "Browse NIEM and community content",
     icon: icons.browse,
     description: "Browse NIEM and published models top-down.  Look at highlighted NIEM components."

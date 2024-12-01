@@ -1,49 +1,9 @@
-import { VersionedItem } from "./Item";
+import { Entity, VersionedItem, type InfoItem } from "./Entity";
 import { Model } from "./Model";
 
-export type VersionCategoryType = "major" | "minor" | "patch" | "core_supplement" | "domain_update" | "other" | undefined;
+export class Version extends Entity {
 
-
-export class Version extends VersionedItem {
-
-  category: VersionCategoryType;
-
-  conformanceTargets = "";
-
-  draft = "";
-
-  exchangePartners = "";
-
-  exchangePattern = "";
-
-  isCurrent = false;
-
-  isPublished = false;
-
-  get localID() {
-    return this.versionNumber;
-  }
-
-  revised = "";
-
-  status = "";
-
-  uri = "";
-
-  _versionNumber = "";
-
-  get versionNumber() {
-    return this._versionNumber;
-  }
-
-  set versionNumber(value: string) {
-    this._versionNumber = value;
-    this.id = Version.id(this.modelID, value);
-    this.versionID = this.id;
-  }
-
-  // Local fields
-
+  // LATER: Simple NIEM rendering options
   /**
    * Rendering options for simplified NIEM message format schemas
    */
@@ -54,56 +14,36 @@ export class Version extends VersionedItem {
     useAliases: false
   }
 
-  constructor(model: Model, versionNumber: string, niemVersionNumber: string) {
-    super();
-    this.stewardID = model.stewardID;
-    this.modelID = model.id;
-    this.versionNumber = versionNumber;
-    this.niemVersionNumber = niemVersionNumber;
-  }
-
   static override id(modelID: string, versionNumber: string) {
     return `${modelID}/${versionNumber}`;
   }
 
-  static override route(versionID: string) {
-    let [stewardKey, modelKey, versionNumber] = versionID.split("/");
-    return `${Model.route(stewardKey, modelKey)}/versions/${versionNumber}`;
-  }
-
-  toCMF() {
-    // TODO: Implement toCMF()
-  }
-
-  static override fromCMF() {
-    // TODO: Implement fromCMF()
-  }
-
-  static override fromAPI(model: Model, data: APIVersionFull): Version {
-    let version = new Version(model, data.versionNumber, data.niemVersionNumber);
-
-    version.category = data.category;
-    version.conformanceTargets = data.conformanceTargets;
-    version.draft = data.draft;
-    version.exchangePartners = data.exchangePartners;
-    version.exchangePattern = data.exchangePattern;
-    version.isCurrent = data.isCurrent;
-    version.isPublished = data.isPublished;
-    version.revised = data.revised;
-    version.status = data.status;
-    version.uri = data.uri;
-
-    return version;
-  }
-
-  static initDefaults(models: Model[], niemVersionNumber: string) {
-    let versions: Version[] = [];
-
-    for (let model of models) {
-      versions.push(new Version(model, model?.selectedVersionID?.split("/")?.pop() || "", niemVersionNumber))  ;
+  static override route(params: ModelParams | VersionParams) {
+    let base = `${ Model.route(params) }/versions`;
+    if ("versionNumber" in params) {
+      return `${ base }/${ params.versionNumber }`;
     }
+    return base;
+  }
 
-    return versions;
+  static override infoItems(version: VersionType) {
+    let items: InfoItem[] = [];
+
+    Entity.addInfoItem(items, "Version Number", version.versionNumber);
+
+    Entity.addInfoItem(items, "Category", version.category);
+    Entity.addInfoItem(items, "Conformance targets", version.conformanceTargets);
+    Entity.addInfoItem(items, "Draft", version.draft);
+    Entity.addInfoItem(items, "Exchange partners", version.exchangePartners);
+    Entity.addInfoItem(items, "Exchange pattern", version.exchangePattern);
+    Entity.addInfoItem(items, "Is current?", version.isCurrent + "");
+    Entity.addInfoItem(items, "Is published?", version.isPublished + "");
+    Entity.addInfoItem(items, "NIEM version number", version.niemVersionNumber);
+    Entity.addInfoItem(items, "Revised date", version.revised);
+    Entity.addInfoItem(items, "Status", version.status);
+    Entity.addInfoItem(items, "URI", version.uri, "link");
+
+    return items;
   }
 
 }
