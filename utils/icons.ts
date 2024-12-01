@@ -44,7 +44,8 @@ export default {
   more: "material-symbols:expand-more-rounded",
   less: "material-symbols:expand-less-rounded",
   map: "material-symbols:equal-rounded",
-  copy: "material-symbols:content-copy-outline-rounded",
+  copy: "tabler:copy",
+  copied: "tabler:copy-check",
   close: "i-heroicons-x-mark-20-solid",
   upload: "material-symbols-light:upload-file-outline-rounded",
   download: "material-symbols-light:download-rounded",
@@ -70,6 +71,15 @@ export default {
   json: "ph:brackets-curly",
   owl: "material-symbols:owl-outline-rounded",
   zip: "material-symbols:folder-zip-outline-rounded",
-  csv: "material-symbols:csv-outline-rounded"
+  csv: "material-symbols:csv-outline-rounded",
+
+  // NIEM entities
+  steward: "lucide:building",
+  model: "material-symbols:network-node",
+  version: "lucide:hash",
+  namespace: "mdi:file-document-outline",
+  property: "oui:token-property",
+  class: "streamline:hierarchy-2",
+  datatype: "clarity:block-line"
 
 } as const;
