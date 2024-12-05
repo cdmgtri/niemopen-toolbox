@@ -1,105 +1,72 @@
 import { Component } from "./Component";
-import { Type } from "./Type";
+import { Entity } from "./Entity";
 import { Version } from "./Version";
 
-export type PropertyCategory = "object" | "data" | "abstract" | "attribute" | undefined;
+export type PropertyBaseCategory = "object" | "data" | "abstract" | "attribute";
 
-export type PropertyDataPattern = "text" | "number" | "id" | "date" | "value" | undefined;
+export type PropertyDataPattern = "text" | "number" | "id" | "date" | "value";
 
-export type PropertyObjectPattern = "object" | "association" | "adapter" | "augmentation" | undefined;
+export type PropertyObjectPattern = "object" | "association" | "adapter" | "augmentation";
 
 export type PropertyPattern = PropertyDataPattern | PropertyObjectPattern;
-
 
 
 export class Property extends Component {
 
   static readonly PROPERTY_DATA_REPRESENTATION_TERMS = ["Amount", "BinaryObject", "Graphic", "Picture", "Sound", "Video", "Code", "DateTime", "Date", "Time", "Duration", "ID", "URI", "Indicator", "Measure", "Numeric", "Value", "Rate", "Percent", "Quantity", "Text", "Name", "List"];
 
-  alias = "";
-
-  category: PropertyCategory | undefined;
-
-  exampleContent = "";
-
-  groupID = "";
-
-  get isAttribute() {
-    return this.category == "attribute";
+  static override route(params: NamespaceParams | ComponentParams) {
+    let route = Version.route(params);
+    if ("qname" in params) {
+      route += `/properties/${ params.qname }`;
+    }
+    else {
+      route += `/namespaces/${ params.prefix }/properties`;
+    }
+    return route;
   }
 
-  isDeprecated = false;
+  static override infoItems(property: PropertyType) {
+    let items = Component.infoItems(property);
 
-  get isElement() {
-    return this.category != "attribute";
+    Entity.addInfoItem(items, "Type", property.type?.qname);
+    Entity.addInfoItem(items, "Group", property.group?.qname);
+    Entity.addInfoItem(items, "Alias", property.alias);
+    Entity.addInfoItem(items, "Keywords", property.keywords);
+    Entity.addInfoItem(items, "Example content", property.exampleContent);
+    Entity.addInfoItem(items, "Usage info", property.usageInfo);
+
+    return items;
   }
 
-  keywords = "";
-
-  pattern: PropertyPattern | undefined;
-
-  usageInfo = "";
-
-  typeID = "";
-
-  constructor(version: Version, qname: string, definition?: string) {
-    super(version, qname, definition);
+  static async property(propertyParams: ComponentParams) {
+    let response = await fetch(Property.route(propertyParams));
+    if (response.ok) {
+      return await response.json() as PropertyType;
+    }
   }
 
-  static override route(versionID: string, qname: string) {
-    return `${Version.route(versionID)}/properties/${qname}`;
-  }
-
-  toCMF() {
-    // TODO: Implement toCMF()
-    throw new Error("Method not yet implemented");
-  }
-
-  static override fromCMF() {
-    // TODO: Implement fromCMF()
-    throw new Error("Method not yet implemented");
-  }
-
-  static override fromAPI(version: Version, data: APIPropertyFull): Property {
-    let property = new Property(version, data.qname, data.definition);
-
-    property.alias = data.alias;
-    property.category = Property.categoryFromAPI(data.category, data.type?.category);
-    property.definition = data.definition;
-    property.exampleContent = data.exampleContent;
-    property.isDeprecated = data.isDeprecated;
-    property.keywords = data.keywords;
-    property.usageInfo = data.usageInfo;
-
-    property.groupID = data.group ? Property.id(version.id, data.group.qname) : "";
-
-    property.typeID = data.type ? Type.id(version.id, data.type.qname) : "";
-
-    return property;
-  }
-
-  private static categoryFromAPI(apiPropertyCategory: APIPropertyCategory, apiTypeCategory?: APITypeCategory): PropertyCategory {
+  private static categoryFromAPI(apiPropertyCategory: PropertyCategory, apiTypeCategory?: TypeCategory): PropertyBaseCategory | undefined {
     switch (apiPropertyCategory) {
-      case "abstract_element":
-        return "abstract";
-      case "attribute":
-        return "attribute";
+      case "abstract_element": return "abstract";
+
+      case "attribute": return "attribute";
+
       case "element":
         switch (apiTypeCategory) {
-          case "complex_object":
-            return "object";
+          case "complex_object": return "object";
+
           case "complex_value":
           case "simple_value":
             return "data";
         }
     }
-    return undefined;
   }
 
-  get categoryOptions() {
-    switch (this.category) {
+  static categoryOptions(category: PropertyBaseCategory) {
+    switch (category) {
       case "abstract":
-        return Property.loadCategoryOptions("abstract", "error", undefined, "abstract_element", "abstract");
+        return Property.loadCategoryOptions("abstract", "neutral", undefined, "abstract_element", "abstract");
 
       case "attribute":
         return Property.loadCategoryOptions("attribute", "warning", undefined, "attribute", "data property");
@@ -112,7 +79,7 @@ export class Property extends Component {
     }
   }
 
-  private static loadCategoryOptions(label: string, color: string, icon?: string, apiValue?: APIPropertyCategory, cmfValue ?: string) {
+  private static loadCategoryOptions(label: string, color: string, icon?: string, apiValue?: PropertyCategory, cmfValue ?: string) {
     return { label, color, icon, apiValue, cmfValue };
   }
 

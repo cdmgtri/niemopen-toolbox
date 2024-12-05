@@ -4,7 +4,7 @@
 
     <div class="flex justify-between z-30">
       <!-- Header icon and title -->
-      <ToolboxIconTitle :icon="page.icon" :title="page.label" classes="page-header-title font-bold"/>
+      <ToolboxIconTitle :icon="page.icon || icons.error" :title="page.label + ' ' + additionalTitle" classes="page-header-title font-bold"/>
 
       <!-- Header buttons -->
       <span class="gap-1.5">
@@ -31,7 +31,7 @@
 
     <!-- Display user info, developer info, or preferences if clicked -->
     <div id="page-header-more" v-if="activePanel && activePanelID">
-      <PageMore :icon="activePanel.icon" :title="activePanel.label" :slotName="activePanelID">
+      <PageMore :icon="activePanel.icon || icons.error" :title="activePanel.label || ''" :slotName="activePanelID">
         <template #[activePanelID]>
           <slot :name="activePanelID"/>
         </template>
@@ -46,8 +46,9 @@
 
 import { ref } from 'vue';
 
-const { page } = defineProps<{
-  page: AppLinkType
+const { page, additionalTitle = "" } = defineProps<{
+  page: AppLinkType,
+  additionalTitle?: string
 }>();
 
 type PanelIDType = "user" | "developer" | "preferences";

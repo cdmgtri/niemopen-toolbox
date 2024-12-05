@@ -5,15 +5,22 @@ declare global {
     stewardKey: string
   }
 
-  type ModelParams = {
-    steward: StewardRef,
+  type ModelParams = StewardParams & {
     modelKey: string
   }
 
   type VersionParams = ModelParams & {
-    steward: StewardRef,
-    model: ModelRef,
     versionNumber: string
+  }
+
+  type NamespaceParams = VersionParams & {
+    prefix: string
+  }
+
+  type ComponentParams = VersionParams & {
+    qname: string,
+    prefix?: string,
+    name?: string
   }
 
   type EntityType = {
@@ -25,7 +32,7 @@ declare global {
   }
 
   type EntityRef = {
-    route: string
+    route?: string
   }
 
   type StewardCategory = "Federal" | "State" | "Local" | "Tribal" | "Territorial" | "International" | "Industry" | "Nonprofit" | "SDO" | "Educational" | "Person" | "Other";
@@ -49,7 +56,7 @@ declare global {
 
   type StewardRef = EntityRef & {
     stewardKey: string,
-    shortName: string
+    shortName?: string
   }
 
 
@@ -72,24 +79,21 @@ declare global {
     website?: string
   }
 
-  type ModelRef = {
-    route: string,
+  type ModelRef = EntityRef & {
     modelKey: string,
-    shortName: string
+    shortName?: string
   }
 
   type VersionCategoryType = "major" | "minor" | "patch" | "core_supplement" | "domain_update" | "other" | undefined;
 
 
-  type VersionRef = {
-    route: string,
+  type VersionRef = EntityRef & {
     versionNumber: string,
-    niemVersionNumber: string
+    niemVersionNumber?: string
   }
 
-  type VersionType = {
-    "@id": string;
-    "@type": string;
+  type VersionType = EntityType & {
+    "@type": "Version";
     category: VersionCategoryType;
     conformanceTargets: string;
     draft: string;
@@ -97,29 +101,25 @@ declare global {
     exchangePattern: string;
     isCurrent: boolean;
     isPublished: boolean;
-    localIdentifier: string;
     model: ModelRef;
     niemVersionNumber: string;
     revised: string;
-    route: string;
     status: string;
     steward: StewardRef;
-    title: string;
     uri: string;
     versionNumber: string;
   }
 
   type NamespaceCategory = "core" | "domain" | "code" | "adapter" | "auxiliary" | "external" | "utility" | "core_supplement" | "domain_update" | "extension" | "exchange" | "built_in" | "other" | undefined;
 
-  type NamespaceRef = {
+  type NamespaceRef = EntityRef & {
     prefix: string,
-    name: string,
-    category: string, // TODO
-    uri: string
+    name?: string,
+    category?: NamespaceCategory,
+    uri?: string
   }
 
-  type NamespaceType = {
-    "@id": string,
+  type NamespaceType = EntityType & {
     "@type": "Namespace",
     prefix: string,
     name: string,
@@ -132,9 +132,6 @@ declare global {
     filename: string,
     filepath: string,
     conformanceTarget: string,
-    route: string,
-    title: string,
-    localIdentifier: string,
     isOriginal: boolean,
     isDeprecated: boolean,
     hasTarget: boolean, // TODO and ?
@@ -143,41 +140,45 @@ declare global {
     steward: StewardRef
   }
 
-  type PropertyCategory = "element" | "abstract_element" | "attribute";
-
-  type PropertyRef = {
+  type ComponentRef = {
     route: string,
     prefix: string,
     qname: string,
     name: string,
     definition: string,
-    category: PropertyCategory
+    category: PropertyCategory | TypeCategory
   }
 
-  type Property = {
-    "@id": string,
-    "@type": "Property",
+  type ComponentType = EntityType & {
     prefix: string,
     qname: string,
     name: string,
     definition: string,
+    category: PropertyCategory | TypeCategory,
+    terms: string[],
+    isOriginal: boolean,
+    isDeprecated: boolean,
+    namespace: NamespaceRef,
+    version: VersionRef,
+    model: ModelRef,
+    steward: StewardRef
+  }
+
+  type PropertyCategory = "element" | "abstract_element" | "attribute";
+
+  type PropertyRef = ComponentRef & {
+    category: PropertyCategory
+  }
+
+  type PropertyType = ComponentType & {
+    "@type": "Property",
     category: PropertyCategory
     alias: string,
     keywords: string,
     exampleContent: string,
     usageInfo: string,
-    route: string,
-    title: string,
-    localIdentifier: string,
-    terms: string[],
-    isOriginal: boolean,
-    isDeprecated: boolean,
     type?: TypeRef,
     group?: PropertyRef
-    namespace: NamespaceRef,
-    version: VersionRef,
-    model: ModelRef,
-    steward: StewardRef
   }
 
   type TypeCategory = "complex_object" | "complex_value" | "simple_value" | undefined;
@@ -186,39 +187,19 @@ declare global {
 
   type TypePattern = "object" | "adapter" | "association" | "augmentation" | "metadata" | "complex_value" | "simple_value" | "simple_list" | "simple_union" | undefined;
 
-  type TypeRef = {
-    route: string,
-    prefix: string,
-    qname: string,
-    name: string,
-    definition: string,
+  type TypeRef = ComponentRef & {
     category: TypeCategory
   }
 
-  type Type = {
-    "@id": string,
+  type TypeType = ComponentType & {
     "@type": "Type",
-    prefix: string,
-    qname: string,
-    name: string,
-    definition: string,
     category: TypeCategory,
     derivation: TypeDerivation,
     pattern: TypePattern,
-    route: string,
-    title: string,
-    localIdentifier: string,
-    terms: string[],
-    isOriginal: boolean,
-    isDeprecated: boolean,
     isSimple: boolean,
     isComplexContent: boolean,
     isSimpleContent: boolean,
-    base: TypeRef,
-    namespace: NamespaceRef,
-    version: VersionRef,
-    model: ModelRef,
-    steward: StewardRef
+    base?: TypeRef | null,
   }
 
 }

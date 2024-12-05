@@ -16,8 +16,10 @@ const items = computed<VersionItem[]>(() => {
     return {
       icon: icons.version,
       label: version.versionNumber,
+      to: Version.path(Version.params(version)),
       badgeText: badgeText(version),
       badgeColor: badgeColor(version),
+      badgeVariant: version.isCurrent ? "solid" : undefined,
       entity: version,
       infoItems: Version.infoItems(version),
       subEntities: [],
@@ -33,7 +35,7 @@ function badgeText(version: VersionType) {
   if (!version.isPublished) return "draft";
 }
 
-function badgeColor(version: VersionType) {
+function badgeColor(version: VersionType): ColorType | undefined {
   if (version.isCurrent) return "success";
   if (!version.isPublished) return "warning";
 }

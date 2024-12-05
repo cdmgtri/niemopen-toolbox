@@ -21,6 +21,7 @@ const items = ref<StewardItem[]>(stewards.map(steward => {
   return {
     icon: icons.steward,
     label: steward.shortName,
+    to: Steward.path(steward),
     badgeText: badge(steward),
     badgeColor: "neutral",
     entity: steward,
@@ -33,7 +34,7 @@ const items = ref<StewardItem[]>(stewards.map(steward => {
 }));
 
 async function loadModels(item: StewardItem) {
-  item.subEntities = await Data.models(item.entity);
+  item.subEntities = await Steward.models(item.entity);
 }
 
 function badge(steward: StewardType) {

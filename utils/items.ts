@@ -102,6 +102,36 @@ const AppItemsHelper = {
     class: "cursor-not-allowed opacity-50",
     disabled: true
   },
+  steward: {
+    value: "steward",
+    label: "Steward",
+    icon: icons.steward
+  },
+  model: {
+    value: "model",
+    label: "Model",
+    icon: icons.model
+  },
+  version: {
+    value: "version",
+    label: "Version",
+    icon: icons.version
+  },
+  namespace: {
+    value: "namespace",
+    label: "Namespace",
+    icon: icons.namespace
+  },
+  property: {
+    value: "property",
+    label: "Property",
+    icon: icons.property
+  },
+  type: {
+    value: "type",
+    label: "Type",
+    icon: icons.class
+  },
   niemOpenWebsite: {
     value: "niem-open-website",
     to: "https://niemopen.org",

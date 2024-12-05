@@ -1,5 +1,6 @@
 import { Entity, VersionedItem, type InfoItem } from "./Entity";
 import { Model } from "./Model";
+import { Namespace } from "./Namespace";
 
 export class Version extends Entity {
 
@@ -18,12 +19,38 @@ export class Version extends Entity {
     return `${modelID}/${versionNumber}`;
   }
 
-  static override route(params: ModelParams | VersionParams) {
-    let base = `${ Model.route(params) }/versions`;
-    if ("versionNumber" in params) {
-      return `${ base }/${ params.versionNumber }`;
+  static override params(version: VersionType): VersionParams {
+    return {
+      stewardKey: version.steward.stewardKey,
+      modelKey: version.model.modelKey,
+      versionNumber: version.versionNumber
     }
-    return base;
+  }
+
+  static override path(params: VersionParams) {
+    return Model.path(params) + "/" + params.versionNumber;
+  }
+
+  static override route(params: ModelParams | VersionParams) {
+    let route = `${Model.route(params)}/versions`;
+    if ("versionNumber" in params) {
+      return `${route}/${params.versionNumber}`;
+    }
+    return route;
+  }
+
+  static override breadcrumbs(params: VersionParams) {
+    let breadcrumbs = Model.breadcrumbs(params).slice(0, -1);
+    breadcrumbs.push(...[
+      {
+        to: Model.path(params),
+        label: params.modelKey
+      },
+      {
+        label: params.versionNumber
+      }
+    ]);
+    return breadcrumbs;
   }
 
   static override infoItems(version: VersionType) {
@@ -44,6 +71,21 @@ export class Version extends Entity {
     Entity.addInfoItem(items, "URI", version.uri, "link");
 
     return items;
+  }
+
+  static async version(versionParams: VersionParams) {
+    let response = await fetch(Version.route(versionParams));
+    if (response.ok) {
+      return await response.json() as VersionType;
+    }
+  }
+
+  static async namespaces(versionParams: VersionParams) {
+    let response = await fetch(Namespace.route(versionParams));
+    if (response.ok) {
+      return await response.json() as NamespaceType[];
+    }
+    return [];
   }
 
 }

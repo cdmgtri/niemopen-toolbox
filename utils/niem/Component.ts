@@ -1,83 +1,70 @@
-import { VersionedItem } from "./Item";
+import type { BreadcrumbItem } from "@nuxt/ui";
+import { Entity, VersionedItem, type InfoItem } from "./Entity";
+import { Version } from "./Version";
 import { Namespace } from "./Namespace";
-import type { Version } from "./Version";
 
-export abstract class Component extends VersionedItem {
-
-  abstract category: any;
-
-  definition = "";
-
-  get localID() {
-    return this.qname;
-  }
-
-  _name = "";
-
-  get name() {
-    return this._name;
-  }
-
-  set name(value) {
-    this._name = value
-    this._qname = this.prefix + ":" + value;
-    this.id = Component.id(this.versionID, this._qname);
-  }
-
-  get namespaceID() {
-    return Namespace.id(this.versionID, this.prefix);
-  }
-
-  abstract pattern: any;
-
-  _prefix = "";
-
-  get prefix() {
-    return this._prefix;
-  }
-
-  set prefix(value) {
-    this._prefix = value;
-    this._qname = value + ":" + this.name;
-    this.id = Component.id(this.versionID, this.qname);
-  }
-
-  _qname = "";
-
-  get qname() {
-    return this._qname;
-  }
-
-  set qname(value: string) {
-    this._qname = value;
-    [this._prefix, this._name] = value.split(":");
-    this.id = Component.id(this.versionID, value);
-  }
-
-  get terms() {
-    return this.qname
-
-    // Replace dashes and underscores with spaces
-    .replaceAll("_", " ")
-    .replaceAll("-", " ")
-
-    // Add a space after any non-digit that precedes a digit
-    .replace(/(\D+)(\d+)/g, "$1 $2")
-
-    // Add a space before an upper case letter following a lower case letter
-    .replace(/([a-z]+)([A-Z]+)/g, " ")
-
-    .split(" ");
-  }
-
-  constructor(version: Version, qname: string, definition?: string) {
-    super(version);
-    this.qname = qname;
-    if (definition) this.definition = definition;
-  }
+export abstract class Component extends Entity {
 
   static override id(versionID: string, qname: string) {
     return `${versionID}/${qname}`;
+  }
+
+  static override params(component: PropertyType | TypeType): ComponentParams {
+    return {
+      stewardKey: component.steward.stewardKey,
+      modelKey: component.model.modelKey,
+      versionNumber: component.version.versionNumber,
+      qname: component.qname
+    }
+  }
+
+  static override path(params: ComponentParams) {
+    return Version.path(params) + "/" + params.qname;
+  }
+
+  static override breadcrumbs(params: ComponentParams): BreadcrumbItem[] {
+    params.prefix = params.qname.split(":")[0];
+    params.name = params.qname.split(":")[1];
+
+    let breadcrumbs = Namespace.breadcrumbs(params as NamespaceParams).slice(0, -1);
+    breadcrumbs.push(...[
+      {
+        to: Namespace.path(params as NamespaceParams),
+        label: params.prefix
+      },
+      {
+        label: params.name
+      }
+    ]);
+    return breadcrumbs;
+  }
+
+  static override infoItems(component: ComponentType): InfoItem[] {
+    let items: InfoItem[] = [];
+
+    Entity.addInfoItem(items, "QName", component.qname);
+    Entity.addInfoItem(items, "Definition", component.definition);
+    Entity.addInfoItem(items, "Category", component.category);
+    Entity.addInfoItem(items, "Terms", component.terms.join(", "));
+    Entity.addInfoItem(items, "Deprecated?", component.isDeprecated + "");
+
+    return items;
+  }
+
+  static terms(qname: string) {
+    return qname
+
+      // Replace dashes and underscores with spaces
+      .replaceAll("_", " ")
+      .replaceAll("-", " ")
+
+      // Add a space after any non-digit that precedes a digit
+      .replace(/(\D+)(\d+)/g, "$1 $2")
+
+      // Add a space before an upper case letter following a lower case letter
+      .replace(/([a-z]+)([A-Z]+)/g, " ")
+
+      .split(" ");
   }
 
 }

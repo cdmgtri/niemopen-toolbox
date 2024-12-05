@@ -1,4 +1,6 @@
+import type { BreadcrumbItem } from "@nuxt/ui";
 import { Entity, type InfoItem } from "./Entity"
+import { Model } from "./Model";
 
 export class Steward extends Entity {
 
@@ -8,12 +10,38 @@ export class Steward extends Entity {
     return stewardKey || "";
   }
 
-  static override route(params?: StewardParams) {
-    let base = Config.baseURL + "stewards";
-    if (params) {
-      return `${ base }/${ params.stewardKey }`
+  static override params(steward: StewardType): StewardParams {
+    return {
+      stewardKey: steward.stewardKey
     }
-    return base;
+  }
+
+  static override path(params: StewardParams) {
+    return `/browse/${params.stewardKey}`;
+  }
+
+  static override route(params?: StewardParams ) {
+    let route = Config.baseURL + "stewards";
+    if (params) {
+      route += `/${params.stewardKey}`;
+    }
+    return route;
+  }
+
+  static override breadcrumbs(params: StewardParams): BreadcrumbItem[] {
+    return [
+      {
+        to: "/",
+        label: "Home"
+      },
+      {
+        to: "/browse",
+        label: "Browse"
+      },
+      {
+        label: params.stewardKey
+      }
+    ]
   }
 
   static override infoItems(steward: StewardType) {
@@ -33,6 +61,29 @@ export class Steward extends Entity {
     Entity.addInfoItem(items, "Phone", steward.phone);
 
     return items;
+  }
+
+  static async stewards() {
+    let response = await fetch(Steward.route());
+    if (response.ok) {
+      return await response.json() as StewardType[];
+    }
+    return [];
+  }
+
+  static async steward(stewardParams: StewardParams) {
+    let response = await fetch(Steward.route(stewardParams));
+    if (response.ok) {
+      return await response.json() as StewardType;
+    }
+  }
+
+  static async models(stewardParams: StewardParams) {
+    let response = await fetch(Model.route(stewardParams));
+    if (response.ok) {
+      return await response.json() as ModelType[];
+    }
+    return [];
   }
 
 }

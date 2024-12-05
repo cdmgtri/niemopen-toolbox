@@ -49,6 +49,9 @@ export default {
   close: "i-heroicons-x-mark-20-solid",
   upload: "material-symbols-light:upload-file-outline-rounded",
   download: "material-symbols-light:download-rounded",
+  open: "material-symbols:arrow-circle-right-outline-rounded",
+  starOutline: "material-symbols:star-outline",
+  starFilled: "material-symbols:star",
 
   // Directions and locations
   start: "material-symbols:line-start-circle-outline-rounded",

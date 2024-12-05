@@ -10,7 +10,8 @@ declare global {
     value?: "brand" | "home" | ToolType | SiteSettingsType | ReferenceType,
     label?: string,
     description?: string,
-    icon?: IconType
+    icon?: IconType,
+    labelClasses?: string
   }
 
   type DemoFileItemType = SelectItem & {

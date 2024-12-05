@@ -1,13 +1,13 @@
 
 <template>
   <div>
-    <UAccordion :items="items" type="multiple">
+    <UAccordion :items="items" type="multiple" :disabled="!$slots.body" :ui="{ trailingIcon }">
 
       <!-- Accordion item header -->
       <template #default="{ item }">
 
-        <!-- Label -->
-        <span class="align-middle">{{ item.label }}</span>
+        <!-- Link to item -->
+        <ToolboxLink :link="{ label: item.label, to: item.to, labelClasses: 'text-base align-middle' }"/>
 
         <!-- Popover info -->
         <UPopover mode="hover" :content="{side: 'right'}" class="w-[600px]">
@@ -18,7 +18,7 @@
         </UPopover>
 
         <!-- Badge -->
-        <UBadge v-if="item.badgeText" :label="item.badgeText" size="sm" variant="subtle" :color="item.badgeColor || 'neutral'" class="ml-1 font-light"/>
+        <UBadge v-if="item.badgeText" :label="item.badgeText" size="sm" :variant="item.badgeVariant || 'subtle'" :color="item.badgeColor || 'neutral'" class="ml-1 font-light"/>
 
       </template>
 
@@ -49,8 +49,10 @@ import type { InfoItem } from '~/utils/niem/Entity';
 
 export type EntityListItem<T, U> = AccordionItem & {
   label: string,
+  to: string,
   badgeText?: string,
   badgeColor?: ColorType,
+  badgeVariant?: "solid" | "outline" | "soft" | "subtle"
   entity: T,
   description?: string,
   infoItems: InfoItem[],
@@ -58,6 +60,10 @@ export type EntityListItem<T, U> = AccordionItem & {
   subEntitiesLabel: string,
   subEntitiesLoaded: boolean
 }
+
+let slots = useSlots();
+
+let trailingIcon = slots.body ? "" : "invisible";
 
 const { items, loadFunction } = defineProps<{
   items: EntityListItem<T, U>[],

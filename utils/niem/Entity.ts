@@ -1,3 +1,4 @@
+import type { BreadcrumbItem } from "@nuxt/ui";
 
 export type InfoItemFormat = "link" | "email";
 
@@ -40,7 +41,19 @@ export abstract class Entity {
     throw new Error("Method not implemented");
   }
 
+  static params(...args: any[]): Object {
+    throw new Error("Method not implemented");
+  }
+
+  static path(...args: any[]): string {
+    throw new Error("Method not implemented");
+  }
+
   static route(...args: any[]): string {
+    throw new Error("Method not implemented");
+  }
+
+  static breadcrumbs(...args: any[]): BreadcrumbItem[] {
     throw new Error("Method not implemented");
   }
 
@@ -56,6 +69,7 @@ export abstract class Entity {
 
 }
 
+// TODO: Review need for VersionedItem
 export abstract class VersionedItem extends Entity {
 
   abstract toCMF(): any;

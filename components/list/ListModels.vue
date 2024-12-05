@@ -11,7 +11,10 @@
 import { Model } from '~/utils/niem/Model';
 import type { EntityListItem } from './ListTemplate.vue';
 
-const { models=[] } = defineProps<{ models: ModelType[] }>();
+const { models=[], labelStewards = false } = defineProps<{
+  models: ModelType[],
+  labelStewards?: boolean
+}>();
 
 type ModelItem = EntityListItem<ModelType, VersionType>;
 
@@ -19,9 +22,11 @@ const items = computed<ModelItem[]>(() => {
   let modelItems: ModelItem[] = models.map(model => {
     return {
       icon: icons.model,
-      label: model.shortName,
+      label: (labelStewards ? `(${model.steward.shortName}) ` : "") + model.shortName,
+      to: Model.path(Model.params(model)),
       badgeText: model.category,
-      badgeColor: "primary",
+      badgeColor: model.category == "other" ? "neutral" : "primary",
+      badgeVariant: model.category == "reference" ? "solid" : "subtle",
       entity: model,
       description: model.description,
       infoItems: Model.infoItems(model),
@@ -40,7 +45,8 @@ const items = computed<ModelItem[]>(() => {
 });
 
 async function loadVersions(item: ModelItem) {
-  item.subEntities = await Data.versions(item.entity);
+  let params = Model.params(item.entity);
+  item.subEntities = await Model.versions(params);
 }
 
 </script>
