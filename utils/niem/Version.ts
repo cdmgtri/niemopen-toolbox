@@ -1,8 +1,38 @@
-import { Entity, VersionedItem, type InfoItem } from "./Entity";
+import { Entity, type EntityTypeCode } from "./Entity";
 import { Model } from "./Model";
-import { Namespace } from "./Namespace";
+import { Steward } from "./Steward";
+import { ToolboxApp } from "../ToolboxApp";
 
 export class Version extends Entity {
+
+  override "@type": EntityTypeCode = "Version";
+
+  override category?: APIVersionCategoryType;
+
+  conformanceTargets?: string;
+  draft?: string;
+  exchangePartners?: string;
+  exchangePattern?: string;
+  isCurrent?: boolean;
+  isPublished?: boolean;
+  model?: APIModelRef;
+  niemVersionNumber?: string;
+  revised?: string;
+  status?: string;
+  steward?: APIStewardRef;
+  uri?: string;
+  versionNumber?: string;
+
+  namespacesLoaded = false;
+  namespacesCount: number | undefined;
+
+  propertiesLoaded = false;
+  propertiesCount: number | undefined;
+
+  typesLoaded = false;
+  typesCount: number | undefined;
+
+  override disabled = true;
 
   // LATER: Simple NIEM rendering options
   /**
@@ -12,38 +42,119 @@ export class Version extends Entity {
     inlineSubstitutions: false,
     flattenInheritance: false,
     flattenDatatypes: false,
-    useAliases: false
+    useAliases: false,
+    defaultMin: "0",
+    defaultMax: "unbounded",
+    defaultAttributeUse: "optional",
+    removePrefixes: false
   }
 
-  static override id(modelID: string, versionNumber: string) {
-    return `${modelID}/${versionNumber}`;
-  }
+  constructor(model?: Model, versionNumber?: string, niemVersionNumber?: string, category?: APIVersionCategoryType) {
+    super();
+    this.versionNumber = versionNumber;
+    this.niemVersionNumber = niemVersionNumber;
+    this.category = category;
 
-  static override params(version: VersionType): VersionParams {
-    return {
-      stewardKey: version.steward.stewardKey,
-      modelKey: version.model.modelKey,
-      versionNumber: version.versionNumber
+    if (model) {
+      this.model = Model.toRef(model);
+      if (model.steward) {
+        this.steward = model.steward;
+      }
     }
   }
 
-  static override path(params: VersionParams) {
-    return Model.path(params) + "/" + params.versionNumber;
+  override get badgeLabel() {
+    let separator = " | ";
+    if (this.isCurrent) return ToolboxApp.join(separator, this.category, "current");
+    if (!this.isPublished) return ToolboxApp.join(separator, this.category, "draft");
+    return this.category;
   }
 
-  static override route(params: ModelParams | VersionParams) {
-    let route = `${Model.route(params)}/versions`;
+  override get badgeColor(): ColorType {
+    if (this.isCurrent) return "success";
+    if (!this.isPublished) return "warning";
+    return "neutral";
+  }
+
+  override get documentation() {
+    // TODO-API: Version description
+    return undefined;
+  }
+
+  override get icon() {
+    return icons.version;
+  }
+
+  override get infoItems() {
+    let items: InfoItem[] = [];
+
+    Entity.addInfoItem(items, "Version Number", this.versionNumber);
+
+    Entity.addInfoItem(items, "Category", this.category);
+    Entity.addInfoItem(items, "Conformance targets", this.conformanceTargets);
+    Entity.addInfoItem(items, "Draft", this.draft);
+    Entity.addInfoItem(items, "Exchange partners", this.exchangePartners);
+    Entity.addInfoItem(items, "Exchange pattern", this.exchangePattern);
+    Entity.addInfoItem(items, "Is current?", this.isCurrent + "");
+    Entity.addInfoItem(items, "Is published?", this.isPublished + "");
+    Entity.addInfoItem(items, "NIEM version number", this.niemVersionNumber);
+    Entity.addInfoItem(items, "Revised date", this.revised);
+    Entity.addInfoItem(items, "Status", this.status);
+    Entity.addInfoItem(items, "URI", this.uri, "link");
+
+    return items;
+  }
+
+  override get label() {
+    return this.versionNumber || "undefined";
+  }
+
+  override get page() {
+    return AppItems.version;
+  }
+
+  override get params() {
+    return super.params as APIVersionParams;
+  }
+
+  override get tabsItems(): ToolboxTabsItem[] {
+    return [
+      {
+        icon: icons.namespace,
+        label: "Namespaces",
+        slot: "namespaces",
+        count: this.namespacesCount
+      },
+      {
+        icon: icons.property,
+        label: "Properties",
+        slot: "properties",
+        count: this.propertiesCount,
+        more: !this.propertiesLoaded
+      },
+      {
+        icon: icons.type,
+        label: "Types",
+        slot: "types",
+        count: this.typesCount,
+        more: !this.typesLoaded
+      }
+    ];
+  }
+
+  static override apiRoute(params: APIModelParams | APIVersionParams) {
+    let route = `${Model.apiRoute(params)}/versions`;
     if ("versionNumber" in params) {
       return `${route}/${params.versionNumber}`;
     }
     return route;
   }
 
-  static override breadcrumbs(params: VersionParams) {
+  static override breadcrumbs(params: APIVersionParams) {
     let breadcrumbs = Model.breadcrumbs(params).slice(0, -1);
     breadcrumbs.push(...[
       {
-        to: Model.path(params),
+        to: Model.toolboxRoute(params),
         label: params.modelKey
       },
       {
@@ -53,39 +164,57 @@ export class Version extends Entity {
     return breadcrumbs;
   }
 
-  static override infoItems(version: VersionType) {
-    let items: InfoItem[] = [];
-
-    Entity.addInfoItem(items, "Version Number", version.versionNumber);
-
-    Entity.addInfoItem(items, "Category", version.category);
-    Entity.addInfoItem(items, "Conformance targets", version.conformanceTargets);
-    Entity.addInfoItem(items, "Draft", version.draft);
-    Entity.addInfoItem(items, "Exchange partners", version.exchangePartners);
-    Entity.addInfoItem(items, "Exchange pattern", version.exchangePattern);
-    Entity.addInfoItem(items, "Is current?", version.isCurrent + "");
-    Entity.addInfoItem(items, "Is published?", version.isPublished + "");
-    Entity.addInfoItem(items, "NIEM version number", version.niemVersionNumber);
-    Entity.addInfoItem(items, "Revised date", version.revised);
-    Entity.addInfoItem(items, "Status", version.status);
-    Entity.addInfoItem(items, "URI", version.uri, "link");
-
-    return items;
+  static override id(modelID: string, versionNumber: string) {
+    return `${modelID}/${versionNumber}`;
   }
 
-  static async version(versionParams: VersionParams) {
-    let response = await fetch(Version.route(versionParams));
-    if (response.ok) {
-      return await response.json() as VersionType;
+  static override init() {
+    return new Version();
+  }
+
+  static override params(version: APIVersion | string): APIVersionParams {
+    if (typeof version == "string") {
+      let [stewardKey, modelKey, versionNumber] = version.split("/");
+      return {
+        stewardKey,
+        modelKey,
+        versionNumber
+      }
+    }
+    return {
+      stewardKey: version.steward.stewardKey,
+      modelKey: version.model.modelKey,
+      versionNumber: version.versionNumber
     }
   }
 
-  static async namespaces(versionParams: VersionParams) {
-    let response = await fetch(Namespace.route(versionParams));
-    if (response.ok) {
-      return await response.json() as NamespaceType[];
+  /**
+   * Sort by version number descending.
+   */
+  static override sort(a: Version, b:Version) {
+    if (!a.versionNumber || !b.versionNumber) {
+      return 0;
     }
-    return [];
+    return b.versionNumber.localeCompare(a.versionNumber);
+  }
+
+  static override toolboxRoute(params: APIVersionParams) {
+    return Model.toolboxRoute(params) + "/" + params.versionNumber;
+  }
+
+  static override toRef(entity: Version): APIVersionRef {
+    return {
+      route: entity.route,
+      versionNumber: entity.versionNumber as string,
+      niemVersionNumber: entity.niemVersionNumber
+    }
+  }
+
+  // TODO-API: Move category information to API
+  static category(version: Version): APIVersionCategoryType | undefined {
+    if (version.steward?.stewardKey == Steward.NIEMStewardKey && version.model?.modelKey == Model.NIEMModelKey) {
+      return version.versionNumber?.endsWith("0") ? "major" : "minor";
+    }
   }
 
 }

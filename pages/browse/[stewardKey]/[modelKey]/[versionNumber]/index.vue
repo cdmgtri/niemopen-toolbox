@@ -1,35 +1,21 @@
 
 <template>
-  <Entity :page="AppItems.version" :breadcrumbs="breadcrumbs" :additional-title="params.versionNumber" :info-items="infoItems" :found="found">
-    <ToolboxCollapsible :label="namespacesLabel">
-      <ListNamespaces :namespaces="namespaces"/>
-    </ToolboxCollapsible>
-  </Entity>
+  <div>
+    <ContentVersion v-if="version" as="page" :version="version" :group-namespaces-by-category="groupNamespacesByCategory">
+      <template #preferences>
+        <UCheckbox v-model="groupNamespacesByCategory" label="Group namespaces by category?" class="py-4"/>
+      </template>
+    </ContentVersion>
+    <ContentNotFound v-else/>
+  </div>
 </template>
 
 <script setup lang="ts">
-import type { InfoItem } from '~/utils/niem/Entity';
-import { Version } from '~/utils/niem/Version';
 
-const route = useRoute();
+const params = useRoute().params as APIVersionParams;
 
-const params = route.params as VersionParams;
+const groupNamespacesByCategory = ref(true);
 
-const breadcrumbs = Version.breadcrumbs(params);
-
-let found = false;
-let infoItems: InfoItem[] = [];
-
-const version = await Version.version(params);
-
-let namespaces: NamespaceType[] = [];
-let namespacesLabel = "Namespaces";
-
-if (version) {
-  found = true;
-  infoItems = Version.infoItems(version);
-  namespaces = await Version.namespaces(params);
-  namespacesLabel += ` (${namespaces.length})`;
-}
+const version = await Data.version(params);
 
 </script>

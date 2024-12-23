@@ -1,26 +1,122 @@
-import type { BreadcrumbItem } from "@nuxt/ui";
-import { Entity, type InfoItem } from "./Entity"
-import { Model } from "./Model";
+import type { BreadcrumbItem, TabsItem } from "@nuxt/ui";
+import { Entity, type EntityTypeCode } from "./Entity"
 
 export class Steward extends Entity {
 
+  override "@type": EntityTypeCode = "Steward";
+
+  override category?: APIStewardCategory;
+
+  address?: string;
+  contactName?: string;
+  country?: string;
+  description?: string;
+  email?: string;
+  fullName?: string;
+  phone?: string;
+  shortName?: string;
+  stewardKey?: string;
+  subunit?: string;
+  unit?: string;
+  website?: string;
+
+  modelsLoaded = false;
+  modelsCount: number | undefined;
+
+  namespacesLoaded = false;
+
   static readonly NIEMStewardKey = "niem";
 
-  static override id(stewardKey: string | undefined) {
-    return stewardKey || "";
+  constructor(shortName?: string, fullName?: string, category?: APIStewardCategory) {
+    super();
+    this.shortName = shortName;
+    this.fullName = fullName;
+    this.category = category;
   }
 
-  static override params(steward: StewardType): StewardParams {
-    return {
-      stewardKey: steward.stewardKey
-    }
+  override get apiRoute() {
+    return Steward.apiRoute(this.params);
   }
 
-  static override path(params: StewardParams) {
-    return `/browse/${params.stewardKey}`;
+  override get badgeLabel() {
+    let label = "";
+
+    // TODO-API: Update NIEM steward to remove country
+    label += this.stewardKey == "niem" ? "" : this.country;
+    label += label.length > 0 && this.category ? " | " : "";
+    label += this.category;
+
+    return label;
   }
 
-  static override route(params?: StewardParams ) {
+  override get badgeColor(): ColorType {
+    return "neutral";
+  }
+
+  override get breadcrumbs() {
+    return Steward.breadcrumbs(this.params);
+  }
+
+  override get documentation() {
+    return this.description;
+  }
+
+  override get icon() {
+    return icons.steward;
+  }
+
+  override get infoItems() {
+    let items: InfoItem[] = [];
+
+    let unit = this.unit + (this.unit && this.subunit ? " | " : "") + this.subunit;
+
+    Entity.addInfoItem(items, "Full name", this.fullName);
+    Entity.addInfoItem(items, "Unit", unit);
+    Entity.addInfoItem(items, "Description", this.description);
+    Entity.addInfoItem(items, "Category", this.category);
+    Entity.addInfoItem(items, "Contact", this.contactName);
+    Entity.addInfoItem(items, "Address", this.address);
+    Entity.addInfoItem(items, "Country", this.country);
+    Entity.addInfoItem(items, "Website", this.website, "link");
+    Entity.addInfoItem(items, "Email", this.email, "email");
+    Entity.addInfoItem(items, "Phone", this.phone);
+
+    return items;
+  }
+
+  override get label() {
+    return this.shortName || "undefined";
+  }
+
+  override get page() {
+    return AppItems.steward;
+  }
+
+  override get params() {
+    return super.params as APIStewardParams;
+  }
+
+  override get tabsItems(): ToolboxTabsItem[] {
+    return [
+      {
+        icon: icons.model,
+        label: "Models",
+        slot: "models",
+        count: this.modelsCount
+      },
+      {
+        icon: icons.namespace,
+        label: "Namespaces",
+        slot: "namespaces"
+      }
+    ];
+  }
+
+  override get toolboxRoute() {
+    return Steward.toolboxRoute(this.params);
+  }
+
+  static override apiRoute(params?: APIStewardParams) {
     let route = Config.baseURL + "stewards";
     if (params) {
       route += `/${params.stewardKey}`;
@@ -28,7 +124,7 @@ export class Steward extends Entity {
     return route;
   }
 
-  static override breadcrumbs(params: StewardParams): BreadcrumbItem[] {
+  static override breadcrumbs(params: APIStewardParams): BreadcrumbItem[] {
     return [
       {
         to: "/",
@@ -44,46 +140,45 @@ export class Steward extends Entity {
     ]
   }
 
-  static override infoItems(steward: StewardType) {
-    let items: InfoItem[] = [];
-
-    let unit = steward.unit + (steward.unit && steward.subunit ? " | " : "") + steward.subunit;
-
-    Entity.addInfoItem(items, "Full name", steward.fullName);
-    Entity.addInfoItem(items, "Unit", unit);
-    Entity.addInfoItem(items, "Description", steward.description);
-    Entity.addInfoItem(items, "Category", steward.category);
-    Entity.addInfoItem(items, "Contact", steward.contactName);
-    Entity.addInfoItem(items, "Address", steward.address);
-    Entity.addInfoItem(items, "Country", steward.country);
-    Entity.addInfoItem(items, "Website", steward.website, "link");
-    Entity.addInfoItem(items, "Email", steward.email, "email");
-    Entity.addInfoItem(items, "Phone", steward.phone);
-
-    return items;
+  static override id(stewardKey: string | undefined) {
+    return stewardKey || "";
   }
 
-  static async stewards() {
-    let response = await fetch(Steward.route());
-    if (response.ok) {
-      return await response.json() as StewardType[];
+  static override init() {
+    return new Steward();
+  }
+
+  static override params(steward: APISteward | string): APIStewardParams {
+    if (typeof steward == "string") {
+      return {
+        stewardKey: steward
+      }
     }
-    return [];
-  }
-
-  static async steward(stewardParams: StewardParams) {
-    let response = await fetch(Steward.route(stewardParams));
-    if (response.ok) {
-      return await response.json() as StewardType;
+    return {
+      stewardKey: steward.stewardKey
     }
   }
 
-  static async models(stewardParams: StewardParams) {
-    let response = await fetch(Model.route(stewardParams));
-    if (response.ok) {
-      return await response.json() as ModelType[];
+  /**
+   * Sort by NIEM first, then short name.
+   */
+  static override sort(a: Steward, b: Steward): number {
+    if (b.stewardKey == "niem") {
+      return 1;
     }
-    return [];
+    return a.stewardKey?.localeCompare(b.stewardKey || "") || 0;
+  }
+
+  static override toolboxRoute(params: APIStewardParams) {
+    return `/browse/${params.stewardKey}`;
+  }
+
+  static override toRef(entity: Steward): APIStewardRef {
+    return {
+      route: entity.route,
+      stewardKey: entity.stewardKey as string,
+      shortName: entity.shortName
+    }
   }
 
 }

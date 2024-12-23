@@ -4,7 +4,7 @@
 
     <div class="flex justify-between z-30">
       <!-- Header icon and title -->
-      <ToolboxIconTitle :icon="page.icon || icons.error" :title="page.label + ' ' + additionalTitle" classes="page-header-title font-bold"/>
+      <ToolboxIconTitle :icon="page.icon || icons.error" :title="title" classes="page-header-title font-bold"/>
 
       <!-- Header buttons -->
       <span class="gap-1.5">
@@ -21,8 +21,8 @@
               :icon="panel.icon"
               :disabled="!$slots[panel.value]"
               :ui="ui"
+              :class="[ activePanelID == panel.value ? 'open' : '', 'button-toggler']"
               @click="toggle"
-              v-bind:class="{ 'open': activePanelID == panel.value }"
             />
           </UTooltip>
         </UButtonGroup>
@@ -46,10 +46,12 @@
 
 import { ref } from 'vue';
 
-const { page, additionalTitle = "" } = defineProps<{
+const { page, label = "" } = defineProps<{
   page: AppLinkType,
-  additionalTitle?: string
+  label?: string
 }>();
+
+const title = label ? `[${ page.label }] ${ label }` : (page.label || "");
 
 type PanelIDType = "user" | "developer" | "preferences";
 
@@ -105,7 +107,7 @@ const ui = {
   margin-left: 12px;
 }
 
-#page-header button {
+#page-header button .button-toggler {
   background-color: white;
 }
 

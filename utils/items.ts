@@ -132,6 +132,16 @@ const AppItemsHelper = {
     label: "Type",
     icon: icons.class
   },
+  childProperty: {
+    value: "childProperty",
+    label: "Child Property",
+    icon: icons.childProperty
+  },
+  facet: {
+    value: "facet",
+    label: "Facet",
+    icon: icons.facet
+  },
   niemOpenWebsite: {
     value: "niem-open-website",
     to: "https://niemopen.org",

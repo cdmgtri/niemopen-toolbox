@@ -1,30 +1,44 @@
 
 <template>
-  <PageNamespace v-if="page=='namespace'"/>
-  <PageProperty v-else-if="page=='property'"/>
-  <PageType v-else/>
+  <div>
+    <ContentNamespace v-if="namespace" :namespace="namespace" as="page"/>
+    <ContentProperty v-else-if="property" :property="property" as="page"/>
+    <ContentType v-else-if="type" :type="type" as="page"/>
+    <ContentNotFound v-else/>
+  </div>
 </template>
 
 <script setup lang="ts">
+import type { Namespace } from '~/utils/niem/Namespace';
+import type { Property } from '~/utils/niem/Property';
+import type { Type } from '~/utils/niem/Type';
 
 const route = useRoute();
 
-const slug = route.params.slug as string;
+type RouteParamsType = APIVersionParams & {
+  slug: string
+}
 
-type Page = "namespace" | "property" | "type";
+const params = route.params as RouteParamsType;
+const slug = params.slug as string;
 
-let page: Page;
+let namespace: Namespace | undefined;
+let property: Property | undefined;
+let type: Type | undefined;
+
+const toolbox = useToolboxStore();
 
 if (slug.includes(":")) {
-  if (slug.endsWith("Type") || slug.startsWith("xs:") || slug.startsWith("niem-xs:")) {
-    page = "type";
+  let [prefix, qname] = slug.split(":");
+  if (slug.endsWith("Type") || ToolboxApp.TYPE_PREFIXES.includes(prefix)) {
+    type = await toolbox.type({...params, qname: slug});
   }
   else {
-    page = "property";
+    property = await toolbox.property({...params, qname: slug});
   }
 }
 else {
-  page = "namespace";
+  namespace = await toolbox.namespace({...params, prefix: slug});
 }
 
 </script>

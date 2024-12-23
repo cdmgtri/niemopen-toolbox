@@ -1,16 +1,16 @@
 
 <template>
   <div>
-    <UAccordion :items="items" type="multiple" :disabled="!$slots.body" :ui="{ trailingIcon }">
+    <UAccordion :items="entities" type="multiple" :ui="ui" :disabled="disableExpand">
 
       <!-- Accordion item header -->
-      <template #default="{ item }">
+      <template #default="{ item, index }" >
 
         <!-- Link to item -->
-        <ToolboxLink :link="{ label: item.label, to: item.to, labelClasses: 'text-base align-middle' }"/>
+        <ToolboxLink :link="{ label: item.label, to: item.to, labelClasses: 'align-middle' }"/>
 
         <!-- Popover info -->
-        <UPopover mode="hover" :content="{side: 'right'}" class="w-[600px]">
+        <UPopover mode="hover" :content="{side: 'right'}" :open-delay="700">
           <UButton :icon="icons.info" color="neutral" variant="ghost" class="align-middle text-[var(--ui-text-muted)]"/>
           <template #content>
             <InfoTable :data="item.infoItems" width-class="w-[600px]"/>
@@ -18,56 +18,60 @@
         </UPopover>
 
         <!-- Badge -->
-        <UBadge v-if="item.badgeText" :label="item.badgeText" size="sm" :variant="item.badgeVariant || 'subtle'" :color="item.badgeColor || 'neutral'" class="ml-1 font-light"/>
+        <UBadge v-if="item.badgeLabel" :label="item.badgeLabel" size="sm" :variant="item.badgeVariant || 'subtle'" :color="item.badgeColor || 'neutral'" class="ml-1 font-light align-middle"/>
+
+        <span v-if="useLabelQualifier && item.labelQualifier" class="ml-1 align-middle">
+          <span class="mr-1"> - </span>
+          <span>{{ item.labelQualifier }}</span>
+        </span>
 
       </template>
 
       <!-- Accordion item body -->
-      <template #body="{ item }">
-        <div class="ml-7 mb-2">
+      <template #body="{ item, index }">
+        <div class="ml-5 mb-2">
 
           <!-- Description -->
-          <p v-if="item.description">{{ item.description }}</p>
+          <p v-if="item.documentation" class="mb-4">{{ item.documentation }}</p>
 
-          <!-- Sub-Entities -->
-          <ListTemplateSubEntities :item="item" :load-function="loadFunction">
-            <template #body>
-              <slot name="body" :item="item"/>
-            </template>
-          </ListTemplateSubEntities>
+          <slot name="default" :item="item"/>
 
         </div>
       </template>
 
     </UAccordion>
+
+    <!-- More button and loaded items count -->
+    <div v-if="enableMore && entities.length >= API.PAGINATION_LIMIT">
+      <USeparator class="py-4"/>
+      <div class="flex justify-between">
+        <span>{{ entities.length }} items loaded</span>
+        <UButton label="More" :trailing-icon="icons.down" @click="$emit('loadMore')"/>
+      </div>
+    </div>
   </div>
 </template>
 
-<script setup lang="ts" generic="T extends EntityType, U extends EntityType">
-import type { AccordionItem } from '@nuxt/ui';
-import type { InfoItem } from '~/utils/niem/Entity';
+<script setup lang="ts" generic="T extends APIEntity">
+import type { Entity } from '~/utils/niem/Entity';
 
-export type EntityListItem<T, U> = AccordionItem & {
-  label: string,
-  to: string,
-  badgeText?: string,
-  badgeColor?: ColorType,
-  badgeVariant?: "solid" | "outline" | "soft" | "subtle"
-  entity: T,
-  description?: string,
-  infoItems: InfoItem[],
-  subEntities: U[],
-  subEntitiesLabel: string,
-  subEntitiesLoaded: boolean
-}
-
-let slots = useSlots();
-
-let trailingIcon = slots.body ? "" : "invisible";
-
-const { items, loadFunction } = defineProps<{
-  items: EntityListItem<T, U>[],
-  loadFunction?: (item: EntityListItem<T, U>) => Promise<void>
+const {
+  entities,
+  disableExpand=false,
+  useLabelQualifier=false,
+  enableMore=false
+} = defineProps<{
+  entities: Entity[],
+  disableExpand?: boolean,
+  useLabelQualifier?: boolean,
+  enableMore?: boolean
 }>();
+
+defineEmits(["loadMore"]);
+
+let ui = {
+  leadingIcon: "size-4",
+  trailingIcon: disableExpand ? "invisible" : ""
+}
 
 </script>

@@ -79,10 +79,16 @@ export default {
   // NIEM entities
   steward: "lucide:building",
   model: "material-symbols:network-node",
-  version: "lucide:hash",
+  version: "solar:hashtag-circle-linear",
   namespace: "mdi:file-document-outline",
-  property: "oui:token-property",
+  property: "material-symbols:label-outline-rounded",
+  type: "streamline:hierarchy-2",
   class: "streamline:hierarchy-2",
-  datatype: "clarity:block-line"
+  datatype: "clarity:block-line",
+  contents: "mdi:format-list-group",
+  childProperty: "material-symbols:subdirectory-arrow-right-rounded",
+  // childProperty: "bi:list-nested",
+  facet: "codicon:symbol-enum",
+  term: "material-symbols:dictionary-outline-rounded"
 
 } as const;

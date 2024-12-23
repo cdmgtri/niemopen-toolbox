@@ -18,7 +18,7 @@
 
 defineProps<{ link: AppLinkType }>();
 
-const leadingIconClasses = "size-5 align-middle mr-1";
+const leadingIconClasses = "size-4 align-middle mr-1";
 
 const trailingIconClasses = "size-3 align-top text-[var(--ui-text-dimmed)]";
 

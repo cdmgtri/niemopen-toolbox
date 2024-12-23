@@ -1,33 +1,41 @@
 
 <template>
-  <PageHeader :page="AppItems.browse"/>
+  <PageHeader :page="AppItems.browse">
+    <template #preferences>
+      <span class="mr-2 mb-2">Clear storage:</span>
+      <UButton label="session" @click="resetSessionStorage" size="xs" class="mr-2"/>
+      <UButton label="local" @click="resetLocalStorage" size="xs" class="mr-2"/>
+      <UButton label="all" @click="resetLocalStorage" size="xs"/>
+    </template>
+  </PageHeader>
+
   <UCard>
-    <UTabs :items="items" v-model="activeTab" class="w-full" @update:model-value="load" variant="link">
+    <UTabs :items="items" v-model="activeTab" color="neutral" class="w-full" variant="link">
 
       <template #stewards>
         <ListStewards :stewards="stewards"/>
       </template>
 
       <template #models>
-        <ListModels :models="models" :label-stewards="true"/>
+        <ListModels :models="models" :useLabelQualifier="true"/>
       </template>
 
       <template #highlights>
         <!-- TODO: Highlights -->
-        <UAlert title="HIGHLIGHTS" variant="subtle"/>
-        <ListModels :models="highlights" :label-stewards="true"/>
+        <ContentPlaceholder label="highlights"/>
+        <ContentModel as="list-item" :model="highlights"/>
       </template>
 
       <template #favorites>
         <!-- TODO: Favorites -->
-        <UAlert title="FAVORITES" variant="subtle"/>
-        <ListModels :models="favorites" :label-stewards="true"/>
+        <ContentPlaceholder label="favorites"/>
+        <ContentModel as="list-item" :model="favorites"/>
       </template>
 
       <template #history>
         <!-- TODO: History -->
-        <UAlert title="HISTORY" variant="subtle"/>
-        <ListProperties :properties="history"/>
+        <ContentPlaceholder label="history"/>
+        <ListProperties :properties="propertyHistory"/>
       </template>
 
     </UTabs>
@@ -36,35 +44,26 @@
 
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui';
-import { Model } from '~/utils/niem/Model';
-import { Steward } from '~/utils/niem/Steward';
 
 const activeTab = ref<"stewards"|"models"|"highlights"|"favorites">("stewards");
 
-let stewards = ref<StewardType[]>([]);
-stewards.value = await Steward.stewards();
+const toolbox = useToolboxStore();
+const { highlights, favorites, propertyHistory } = toolbox;
 
-let models = ref<ModelType[]>([]);
-let modelsLoaded = false;
+const stewards = await toolbox.stewards();
+const models = await toolbox.models();
 
-let highlights = ref<ModelType[]>([]);
-let highlightsLoaded = false;
+const router = useRouter();
 
-let favorites = ref<ModelType[]>([]);
-let favoritesLoaded = false;
-
-let history = ref<PropertyType[]>([]);
-let historyLoaded = false;
-
-const items: TabsItem[] = [
+const items = ref<TabsItem[]>([
   {
-    label: "Stewards",
+    label: "Stewards" + ToolboxApp.labelCount(stewards),
     icon: icons.steward,
     slot: "stewards",
     value: "stewards"
   },
   {
-    label: "Models",
+    label: "Models" + ToolboxApp.labelCount(models),
     icon: icons.model,
     slot: "models",
     value: "models"
@@ -82,22 +81,26 @@ const items: TabsItem[] = [
     value: "favorites"
   },
   {
-    label: "History",
+    label: "History" + ToolboxApp.labelCount(propertyHistory),
     icon: icons.history,
     slot: "history",
     value: "history"
   }
-]
+]);
 
-async function load() {
-  switch(activeTab.value) {
-    case 'models':
-      if (!modelsLoaded) {
-        models.value = await Model.models();
-        modelsLoaded = true
-      }
-      break;
-  }
+function resetLocalStorage() {
+  toolbox.resetLocalStorage();
+  router.go(0);
+}
+
+function resetSessionStorage() {
+  toolbox.resetSessionStorage();
+  router.go(0);
+}
+
+function resetAllStorage() {
+  toolbox.$reset();
+  router.go(0);
 }
 
 </script>

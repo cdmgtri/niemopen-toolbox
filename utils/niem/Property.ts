@@ -1,8 +1,9 @@
 import { Component } from "./Component";
-import { Entity } from "./Entity";
+import { Entity, type EntityTypeCode } from "./Entity";
+import { Type } from "./Type";
 import { Version } from "./Version";
 
-export type PropertyBaseCategory = "object" | "data" | "abstract" | "attribute";
+export type PropertyBaseCategory = "object" | "data" | "abstract" | "attribute" | "value";
 
 export type PropertyDataPattern = "text" | "number" | "id" | "date" | "value";
 
@@ -13,10 +14,79 @@ export type PropertyPattern = PropertyDataPattern | PropertyObjectPattern;
 
 export class Property extends Component {
 
+  override "@type": EntityTypeCode = "Property";
+  override category?: APIPropertyCategory = undefined;
+  alias?: string;
+  keywords?: string;
+  exampleContent?: string;
+  usageInfo?: string;
+  type?: APITypeRef;
+  group?: APIPropertyRef;
+
   static readonly PROPERTY_DATA_REPRESENTATION_TERMS = ["Amount", "BinaryObject", "Graphic", "Picture", "Sound", "Video", "Code", "DateTime", "Date", "Time", "Duration", "ID", "URI", "Indicator", "Measure", "Numeric", "Value", "Rate", "Percent", "Quantity", "Text", "Name", "List"];
 
-  static override route(params: NamespaceParams | ComponentParams) {
-    let route = Version.route(params);
+  override get badgeColor(): ColorType {
+    return Property.badgeColor(this.category);
+  }
+
+  override get badgeLabel(): PropertyBaseCategory | undefined {
+    return Property.badgeLabel(this.category, this.type?.category);
+  }
+
+  override get badgeVariant(): ColorVariantType {
+    return Property.badgeVariant(this.category);
+  }
+
+  override get icon() {
+    return icons.property;
+  }
+
+  override get infoItems() {
+    let items = super.infoItems;
+
+    let trailingItems = items.slice(2);
+    items = items.slice(0, 2);
+
+    let typeParams = this.params;
+    typeParams.qname = this.type?.qname || "";
+
+    Entity.addInfoItem(items, "Type", this.type?.qname, "route", Type.toolboxRoute(typeParams));
+
+    Entity.addInfoItem(items, "Category", this.badgeLabel, undefined, undefined, Property.badgeColor(this.category), Property.badgeVariant(this.category));
+
+    Entity.addInfoItem(items, "Group", this.group?.qname);
+
+    Entity.addInfoItem(items, "Alias", this.alias);
+    Entity.addInfoItem(items, "Keywords", this.keywords);
+    Entity.addInfoItem(items, "Example content", this.exampleContent);
+    Entity.addInfoItem(items, "Usage info", this.usageInfo);
+
+    return [...items, ...trailingItems];
+  }
+
+  override get page() {
+    return AppItems.property;
+  }
+
+  override get tabsItems(): ToolboxTabsItem[] {
+    return [
+      {
+        icon: icons.childProperty,
+        label: "Contents",
+        slot: "contents",
+        count: this.contentsCount
+      },
+      {
+        icon: icons.checklist,
+        label: "Usages",
+        slot: "usages",
+        count: this.usagesCount
+      }
+    ];
+  }
+
+  static override apiRoute(params: APINamespaceParams | APIComponentParams) {
+    let route = Version.apiRoute(params);
     if ("qname" in params) {
       route += `/properties/${ params.qname }`;
     }
@@ -26,61 +96,31 @@ export class Property extends Component {
     return route;
   }
 
-  static override infoItems(property: PropertyType) {
-    let items = Component.infoItems(property);
-
-    Entity.addInfoItem(items, "Type", property.type?.qname);
-    Entity.addInfoItem(items, "Group", property.group?.qname);
-    Entity.addInfoItem(items, "Alias", property.alias);
-    Entity.addInfoItem(items, "Keywords", property.keywords);
-    Entity.addInfoItem(items, "Example content", property.exampleContent);
-    Entity.addInfoItem(items, "Usage info", property.usageInfo);
-
-    return items;
+  static override badgeColor(category: APIPropertyCategory | undefined): ColorType {
+    if (category == "attribute") return "warning";
+    return category == "abstract_element" ? "neutral" : "primary";
   }
 
-  static async property(propertyParams: ComponentParams) {
-    let response = await fetch(Property.route(propertyParams));
-    if (response.ok) {
-      return await response.json() as PropertyType;
-    }
+  static override badgeVariant(category: APIPropertyCategory | undefined): ColorVariantType {
+    let label = Property.badgeLabel(category);
+    return label == "object" ? "solid" : "subtle";
   }
 
-  private static categoryFromAPI(apiPropertyCategory: PropertyCategory, apiTypeCategory?: TypeCategory): PropertyBaseCategory | undefined {
-    switch (apiPropertyCategory) {
+  static override init() {
+    return new Property();
+  }
+
+  static badgeLabel(category: APIPropertyCategory | undefined, typeCategory?: APITypeCategory): PropertyBaseCategory | undefined {
+    switch (category) {
       case "abstract_element": return "abstract";
 
       case "attribute": return "attribute";
 
       case "element":
-        switch (apiTypeCategory) {
-          case "complex_object": return "object";
+        if (!typeCategory) return undefined;
 
-          case "complex_value":
-          case "simple_value":
-            return "data";
-        }
+        return typeCategory == "complex_object" ? "object" : "value";
     }
-  }
-
-  static categoryOptions(category: PropertyBaseCategory) {
-    switch (category) {
-      case "abstract":
-        return Property.loadCategoryOptions("abstract", "neutral", undefined, "abstract_element", "abstract");
-
-      case "attribute":
-        return Property.loadCategoryOptions("attribute", "warning", undefined, "attribute", "data property");
-
-      case "data":
-        return Property.loadCategoryOptions("data", "info", undefined, "element", "data property");
-
-      case "object":
-        return Property.loadCategoryOptions("object", "success", undefined, "element", "object");
-    }
-  }
-
-  private static loadCategoryOptions(label: string, color: string, icon?: string, apiValue?: PropertyCategory, cmfValue ?: string) {
-    return { label, color, icon, apiValue, cmfValue };
   }
 
 }
