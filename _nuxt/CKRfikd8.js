@@ -1,0 +1,2 @@
+import{q as t,aF as n,ar as l,e as u,A as f,o as p,i as d,w as i,D as m,H as c,h as _,P as w}from"./B4LEY2OC.js";function C(e){return t(()=>{var o;return n(e)?!!((o=l(e))!=null&&o.closest("form")):!0})}const P=u({__name:"Label",props:{for:{},asChild:{type:Boolean},as:{default:"label"}},setup(e){const o=e;return f(),(r,s)=>(p(),d(_(w),c(o,{onMousedown:s[0]||(s[0]=a=>{!a.defaultPrevented&&a.detail>1&&a.preventDefault()})}),{default:i(()=>[m(r.$slots,"default")]),_:3},16))}});export{P as _,C as u};
+//# sourceMappingURL=CKRfikd8.js.map

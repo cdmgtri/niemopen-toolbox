@@ -1,1 +1,0 @@
-import{e as o,N as n,o as r,c as l,a as s,t as u,f as p,M as m}from"./CWQT1cTJ.js";const f=o({__name:"[stewardKey]",setup(c){const e=n();let{stewardKey:t}=e.params;return console.log(e.params),(d,a)=>(r(),l(m,null,[a[0]||(a[0]=s("div",null,"STEWARD",-1)),s("div",null,u(p(t)),1)],64))}});export{f as default};

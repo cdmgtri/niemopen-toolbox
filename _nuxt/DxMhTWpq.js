@@ -1,1 +1,0 @@
-import{e as r,N as u,o as m,c as p,a as e,t as s,f as t,M as c}from"./CWQT1cTJ.js";const _=r({__name:"[modelKey]",setup(d){const a=u(),{stewardKey:n,modelKey:l}=a.params;return console.log(a.params),(i,o)=>(m(),p(c,null,[o[0]||(o[0]=e("div",null,"MODEL",-1)),e("div",null,s(t(n)),1),e("div",null,s(t(l)),1)],64))}});export{_ as default};

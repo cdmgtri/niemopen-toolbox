@@ -1,0 +1,2 @@
+import{a as t}from"./n2hCANGf.js";import{e as s,o as a,i as r}from"./B4LEY2OC.js";const _=s({__name:"ListTypes",props:{types:{},enableMore:{type:Boolean,default:!1}},emits:["loadMore"],setup(p){return(e,o)=>{const n=t;return a(),r(n,{entities:e.types,"enable-more":e.enableMore,onLoadMore:o[0]||(o[0]=i=>e.$emit("loadMore"))},null,8,["entities","enable-more"])}}});export{_};
+//# sourceMappingURL=Bu0u5di3.js.map

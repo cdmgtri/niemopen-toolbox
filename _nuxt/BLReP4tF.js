@@ -1,0 +1,2 @@
+import{_ as s}from"./E5X8ImdF.js";import{a}from"./n2hCANGf.js";import{e as p,o as i,i as m,w as l,b as _}from"./B4LEY2OC.js";const b=p({__name:"ListProperties",props:{properties:{},enableMore:{type:Boolean,default:!1}},emits:["loadMore"],setup(f){return(e,o)=>{const r=s,n=a;return i(),m(n,{entities:e.properties,"enable-more":e.enableMore,onLoadMore:o[0]||(o[0]=t=>e.$emit("loadMore"))},{default:l(({item:t})=>[_(r,{property:t},null,8,["property"])]),_:1},8,["entities","enable-more"])}}});export{b as _};
+//# sourceMappingURL=BLReP4tF.js.map

@@ -1,0 +1,2 @@
+import{d as p,c as _}from"./n2hCANGf.js";import{_ as r}from"./CzQJv57S.js";import{u as c}from"./6HjxEEwp.js";import{e as m,o as i,i as y,w as e,b as o}from"./B4LEY2OC.js";const h=m({__name:"ContentType",props:{type:{},as:{}},setup(f){return c(),(t,l)=>{const n=p,s=r,a=_;return i(),y(a,{as:t.as,entity:t.type},{contents:e(()=>[o(n,{type:t.type},null,8,["type"])]),usages:e(()=>[o(s,{label:"type usages"})]),_:1},8,["as","entity"])}}});export{h as _};
+//# sourceMappingURL=DMAAWMtI.js.map
